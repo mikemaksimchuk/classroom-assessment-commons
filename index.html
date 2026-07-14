@@ -50,11 +50,67 @@
             <h2 class="text-3xl sm:text-5xl font-extrabold tracking-tight leading-tight">Find classroom assessment resources you can trust.</h2>
             <p class="text-blue-100/90 mt-5 text-base sm:text-lg leading-relaxed max-w-2xl">Explore practical tools, professional learning, and open scholarship curated for educators, leaders, researchers, and policymakers.</p>
           </div>
+          <section class="mt-11" aria-labelledby="prelearning-heading">
+            <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-3 mb-5">
+              <div>
+                <h3 id="prelearning-heading" class="text-xl font-bold tracking-tight">Pre-Learning Pathway Navigation</h3>
+                <p class="text-xs text-slate-400 mt-1">Select your role to explore essential concepts and tailored resources.</p>
+              </div>
+              <button id="clear-pathway" class="hidden text-xs text-blue-300 hover:text-white hover:underline items-center gap-1">
+                <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Clear pathway filter
+              </button>
+            </div>
+            <div id="prelearning-pathways" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <button class="pathway-card text-left" data-pathway="teachers" data-audiences="Teacher">
+                <span class="pathway-icon bg-blue-500/10 text-blue-400"><i data-lucide="book-open" class="w-5 h-5"></i></span>
+                <span class="block font-bold text-white mt-4">Welcome, Teachers</span>
+                <span class="block text-xs text-slate-400 mt-1.5 leading-relaxed">Learn formative assessment practices to integrate into lesson plans seamlessly.</span>
+                <span class="pathway-link text-blue-400">Explore Guides <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i></span>
+              </button>
+              <button class="pathway-card text-left" data-pathway="administrators" data-audiences="Building Administrator|District Administrator|Instructional Coach">
+                <span class="pathway-icon bg-indigo-500/10 text-indigo-400"><i data-lucide="building-2" class="w-5 h-5"></i></span>
+                <span class="block font-bold text-white mt-4">Welcome, Administrators</span>
+                <span class="block text-xs text-slate-400 mt-1.5 leading-relaxed">Support teacher instruction strategies, professional learning, and balanced systems.</span>
+                <span class="pathway-link text-indigo-400">Explore Strategy <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i></span>
+              </button>
+              <button class="pathway-card text-left" data-pathway="policymakers" data-audiences="Policymaker">
+                <span class="pathway-icon bg-purple-500/10 text-purple-400"><i data-lucide="landmark" class="w-5 h-5"></i></span>
+                <span class="block font-bold text-white mt-4">Welcome, Policymakers</span>
+                <span class="block text-xs text-slate-400 mt-1.5 leading-relaxed">Examine accountability frameworks, statewide results, and policy reporting.</span>
+                <span class="pathway-link text-purple-400">Explore Policy <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i></span>
+              </button>
+              <button class="pathway-card text-left" data-pathway="families" data-audiences="Student/Family|Public">
+                <span class="pathway-icon bg-amber-500/10 text-amber-400"><i data-lucide="users" class="w-5 h-5"></i></span>
+                <span class="block font-bold text-white mt-4">Students &amp; Families</span>
+                <span class="block text-xs text-slate-400 mt-1.5 leading-relaxed">Guides on learning benchmarks, score reporting, and assessment clarity.</span>
+                <span class="pathway-link text-amber-400">Explore Guides <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i></span>
+              </button>
+            </div>
+          </section>
           <div id="catalog-summary" class="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-8 max-w-2xl" aria-live="polite"></div>
         </div>
       </div>
 
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        <section class="quality-standards-panel mb-8" aria-labelledby="quality-standards-heading">
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
+            <div>
+              <h2 id="quality-standards-heading" class="font-bold text-slate-900 text-sm tracking-tight uppercase">NCME Classroom Assessment Quality Standards</h2>
+              <p class="text-xs text-slate-500 mt-1">Resources are evaluated through the CAC 20-Point Quality Checklist. A seal is awarded after at least three peer ratings.</p>
+            </div>
+            <span class="text-xs text-slate-500 bg-white border border-slate-200 px-3 py-1 rounded-full font-medium">Peer Evaluated</span>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="quality-rating-card">
+              <span class="quality-star quality-star-gold"><i data-lucide="star" class="w-5 h-5"></i></span>
+              <span><strong class="block text-xs text-slate-800">Gold Standard Rating</strong><span class="block text-[11px] text-slate-500 mt-1">Exceptional resource averaging 18 to 20 rubric points.</span></span>
+            </div>
+            <div class="quality-rating-card">
+              <span class="quality-star quality-star-silver"><i data-lucide="star" class="w-5 h-5"></i></span>
+              <span><strong class="block text-xs text-slate-800">Silver Standard Rating</strong><span class="block text-[11px] text-slate-500 mt-1">Core standard resource averaging 14 to 17.99 rubric points.</span></span>
+            </div>
+          </div>
+        </section>
         <div class="flex flex-col lg:flex-row gap-8">
           <aside class="lg:w-72 shrink-0">
             <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm lg:sticky lg:top-28">
@@ -72,12 +128,22 @@
           </aside>
 
           <section class="flex-1 min-w-0" aria-labelledby="catalog-heading">
-            <div class="flex items-end justify-between gap-4 mb-6">
+            <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-6">
               <div>
                 <p class="text-xs font-bold text-blue-700 uppercase tracking-wider">Resource catalog</p>
                 <h2 id="catalog-heading" class="text-2xl font-extrabold text-slate-900 mt-1">Explore the Commons</h2>
+                <p id="result-count" class="text-sm font-semibold text-slate-500 mt-2" aria-live="polite"></p>
               </div>
-              <p id="result-count" class="text-sm font-semibold text-slate-500" aria-live="polite"></p>
+              <div class="flex items-center gap-2">
+                <i data-lucide="arrow-up-down" class="w-4 h-4 text-slate-400"></i>
+                <label class="text-xs font-semibold text-slate-500 whitespace-nowrap" for="catalog-sort">Sort by</label>
+                <select id="catalog-sort" class="form-control py-2 pr-8 min-w-40">
+                  <option value="quality">Quality Stars</option>
+                  <option value="title">Title A–Z</option>
+                  <option value="provider">Provider A–Z</option>
+                  <option value="newest">Newest Added</option>
+                </select>
+              </div>
             </div>
             <div id="loading-state" class="bg-white border border-slate-200 rounded-2xl p-12 text-center">
               <span class="loading-spinner" aria-hidden="true"></span>
@@ -134,7 +200,7 @@
   <footer class="bg-slate-950 text-slate-400 py-10 border-t border-slate-800 mt-auto">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-5">
       <div class="flex items-center gap-3">
-        <img src="https://account.ncme.org/images/My_Images/NCME-Logo-F.png" alt="" class="h-9 w-auto bg-white rounded px-2 py-1">
+        <img src="https://ncme.org/wp-content/uploads/2025/08/cropped-NCME-Logo-F-500x153.jpg" alt="" class="h-9 w-auto bg-white rounded px-2 py-1">
         <span class="font-bold text-white">Classroom Assessment Commons</span>
       </div>
       <p class="text-xs sm:text-sm text-center">&copy; 2026 National Council on Measurement in Education. All rights reserved.</p>

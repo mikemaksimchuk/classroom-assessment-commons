@@ -8,6 +8,7 @@
   var adminRatings = [];
   var adminNotes = [];
   var activeAdminStatus = 'all';
+  var activePathway = null;
   var currentDetailsResourceId = null;
   var toastTimer = null;
 
@@ -71,6 +72,9 @@
     document.getElementById('add-resource-button').addEventListener('click', function () { openResourceEditor(null); });
     document.getElementById('clear-filters').addEventListener('click', clearFilters);
     document.getElementById('catalog-search').addEventListener('input', renderPublicCatalog);
+    document.getElementById('catalog-sort').addEventListener('change', renderPublicCatalog);
+    document.getElementById('prelearning-pathways').addEventListener('click', handlePathwaySelection);
+    document.getElementById('clear-pathway').addEventListener('click', clearPathwayFilter);
     document.getElementById('admin-search').addEventListener('input', renderAdminResources);
     document.getElementById('login-form').addEventListener('submit', handleLogin);
     document.getElementById('submission-form').addEventListener('submit', handleSubmission);
@@ -203,17 +207,18 @@
         return selected[key].some(function (selectedValue) { return values.indexOf(selectedValue) !== -1; });
       });
     });
+    sortPublicResources(filtered, document.getElementById('catalog-sort').value);
     var grid = document.getElementById('resource-grid');
     grid.innerHTML = '';
     filtered.forEach(function (resource) { grid.appendChild(createResourceCard(resource)); });
-    document.getElementById('result-count').textContent = filtered.length + (filtered.length === 1 ? ' resource' : ' resources');
+    document.getElementById('result-count').textContent = filtered.length + (filtered.length === 1 ? ' resource found matching filters' : ' resources found matching filters');
     document.getElementById('empty-state').classList.toggle('hidden', filtered.length !== 0);
     refreshIcons();
   }
 
   function createResourceCard(resource) {
     var card = document.createElement('article');
-    card.className = 'resource-card';
+    card.className = 'resource-card' + (resource.seal === 'Gold' ? ' seal-gold' : resource.seal === 'Silver' ? ' seal-silver' : '');
     var seal = '';
     if (resource.seal) {
       var sealClass = resource.seal === 'Gold' ? 'bg-amber-50 text-amber-700 border-amber-200' : 'bg-slate-100 text-slate-700 border-slate-300';
@@ -241,7 +246,61 @@
   function clearFilters() {
     document.getElementById('catalog-search').value = '';
     Array.prototype.forEach.call(document.querySelectorAll('[data-filter-key]'), function (input) { input.checked = false; });
+    activePathway = null;
+    updatePathwayUI();
     renderPublicCatalog();
+  }
+
+  function handlePathwaySelection(event) {
+    var card = event.target.closest('[data-pathway]');
+    if (!card) return;
+    activePathway = card.getAttribute('data-pathway');
+    var audiences = (card.getAttribute('data-audiences') || '').split('|').filter(Boolean);
+    document.getElementById('catalog-search').value = '';
+    Array.prototype.forEach.call(document.querySelectorAll('[data-filter-key]'), function (input) {
+      input.checked = input.getAttribute('data-filter-key') === 'audience' && audiences.indexOf(input.value) !== -1;
+    });
+    updatePathwayUI();
+    renderPublicCatalog();
+    document.getElementById('quality-standards-heading').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function clearPathwayFilter() {
+    activePathway = null;
+    Array.prototype.forEach.call(document.querySelectorAll('[data-filter-key="audience"]'), function (input) {
+      input.checked = false;
+    });
+    updatePathwayUI();
+    renderPublicCatalog();
+  }
+
+  function updatePathwayUI() {
+    Array.prototype.forEach.call(document.querySelectorAll('[data-pathway]'), function (card) {
+      var selected = card.getAttribute('data-pathway') === activePathway;
+      card.classList.toggle('active', selected);
+      card.setAttribute('aria-pressed', selected ? 'true' : 'false');
+    });
+    var clearButton = document.getElementById('clear-pathway');
+    clearButton.classList.toggle('hidden', !activePathway);
+    clearButton.classList.toggle('flex', Boolean(activePathway));
+  }
+
+  function sortPublicResources(resources, mode) {
+    resources.sort(function (a, b) {
+      if (mode === 'title') return String(a.title || '').localeCompare(String(b.title || ''));
+      if (mode === 'provider') {
+        return String(a.provider || '').localeCompare(String(b.provider || '')) || String(a.title || '').localeCompare(String(b.title || ''));
+      }
+      if (mode === 'newest') return new Date(b.created_at || 0) - new Date(a.created_at || 0);
+      var sealRank = { Gold: 2, Silver: 1 };
+      var rankDifference = (sealRank[b.seal] || 0) - (sealRank[a.seal] || 0);
+      if (rankDifference) return rankDifference;
+      var averageDifference = Number(b.average_score || 0) - Number(a.average_score || 0);
+      if (averageDifference) return averageDifference;
+      var countDifference = Number(b.ratings_count || 0) - Number(a.ratings_count || 0);
+      if (countDifference) return countDifference;
+      return String(a.title || '').localeCompare(String(b.title || ''));
+    });
   }
 
   async function handleLogin(event) {
