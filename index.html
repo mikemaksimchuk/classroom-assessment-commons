@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="A curated repository of high-quality classroom assessment resources from NCME and trusted partners.">
+  <title>NCME Classroom Assessment Commons</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col antialiased">
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 min-h-20 py-3 flex items-center justify-between gap-4">
+      <button id="home-button" class="flex items-center gap-4 text-left min-w-0" aria-label="Return to the public resource catalog">
+        <img src="https://account.ncme.org/images/My_Images/NCME-Logo-F.png" alt="NCME" class="h-12 sm:h-14 w-auto object-contain">
+        <div class="hidden sm:block min-w-0 border-l border-slate-200 pl-4">
+          <h1 class="font-extrabold text-lg leading-tight text-slate-900 tracking-tight">Classroom Assessment Commons</h1>
+          <p class="text-[10px] font-bold text-blue-800 uppercase tracking-widest mt-1">Curated Resource Repository</p>
+        </div>
+      </button>
+      <nav class="flex items-center gap-2 sm:gap-4 text-sm font-semibold" aria-label="Primary navigation">
+        <button id="explore-button" class="nav-button">Explore</button>
+        <button id="submit-button" class="button-secondary">
+          <i data-lucide="plus-circle" class="w-4 h-4"></i>
+          <span class="hidden sm:inline">Submit a Resource</span>
+          <span class="sm:hidden">Submit</span>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="flex-grow">
+    <div id="configuration-warning" class="hidden bg-amber-50 border-b border-amber-200 text-amber-900 px-4 py-3 text-sm" role="alert">
+      <div class="max-w-7xl mx-auto flex items-start gap-2">
+        <i data-lucide="triangle-alert" class="w-5 h-5 shrink-0 mt-0.5"></i>
+        <p><strong>Setup is incomplete.</strong> A browser-safe Supabase publishable key must be added to <code>config.js</code>.</p>
+      </div>
+    </div>
+
+    <section id="public-view">
+      <div class="hero-panel text-white border-b border-blue-900">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 sm:py-16 relative">
+          <div class="max-w-3xl">
+            <p class="text-blue-200 text-xs font-bold tracking-[0.22em] uppercase mb-4">Evidence-informed assessment practice</p>
+            <h2 class="text-3xl sm:text-5xl font-extrabold tracking-tight leading-tight">Find classroom assessment resources you can trust.</h2>
+            <p class="text-blue-100/90 mt-5 text-base sm:text-lg leading-relaxed max-w-2xl">Explore practical tools, professional learning, and open scholarship curated for educators, leaders, researchers, and policymakers.</p>
+          </div>
+          <div id="catalog-summary" class="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-8 max-w-2xl" aria-live="polite"></div>
+        </div>
+      </div>
+
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        <div class="flex flex-col lg:flex-row gap-8">
+          <aside class="lg:w-72 shrink-0">
+            <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm lg:sticky lg:top-28">
+              <div class="flex items-center justify-between mb-4">
+                <h3 class="font-bold text-slate-900 flex items-center gap-2"><i data-lucide="sliders-horizontal" class="w-4 h-4 text-blue-700"></i> Refine results</h3>
+                <button id="clear-filters" class="text-xs font-semibold text-blue-700 hover:underline">Clear</button>
+              </div>
+              <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2" for="catalog-search">Search</label>
+              <div class="relative mb-5">
+                <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-3"></i>
+                <input id="catalog-search" type="search" class="form-control pl-9" placeholder="Title, topic, provider">
+              </div>
+              <div id="filter-controls" class="space-y-5"></div>
+            </div>
+          </aside>
+
+          <section class="flex-1 min-w-0" aria-labelledby="catalog-heading">
+            <div class="flex items-end justify-between gap-4 mb-6">
+              <div>
+                <p class="text-xs font-bold text-blue-700 uppercase tracking-wider">Resource catalog</p>
+                <h2 id="catalog-heading" class="text-2xl font-extrabold text-slate-900 mt-1">Explore the Commons</h2>
+              </div>
+              <p id="result-count" class="text-sm font-semibold text-slate-500" aria-live="polite"></p>
+            </div>
+            <div id="loading-state" class="bg-white border border-slate-200 rounded-2xl p-12 text-center">
+              <span class="loading-spinner" aria-hidden="true"></span>
+              <p class="mt-4 text-sm text-slate-500">Loading resources...</p>
+            </div>
+            <div id="resource-grid" class="grid grid-cols-1 xl:grid-cols-2 gap-5"></div>
+            <div id="empty-state" class="hidden bg-white border border-slate-200 rounded-2xl p-12 text-center">
+              <i data-lucide="search-x" class="w-10 h-10 text-slate-300 mx-auto"></i>
+              <h3 class="font-bold text-slate-800 mt-4">No resources match these filters</h3>
+              <p class="text-sm text-slate-500 mt-2">Clear one or more filters and try again.</p>
+            </div>
+          </section>
+        </div>
+      </div>
+    </section>
+
+    <section id="admin-view" class="hidden">
+      <div class="bg-slate-900 text-white border-b border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <p class="text-blue-300 text-xs font-bold uppercase tracking-wider">Secure reviewer area</p>
+            <h2 class="text-2xl sm:text-3xl font-extrabold mt-1">Commons Management</h2>
+            <p id="admin-session-label" class="text-sm text-slate-400 mt-2"></p>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <button id="add-resource-button" class="button-primary"><i data-lucide="plus" class="w-4 h-4"></i> Add resource</button>
+            <button id="logout-button" class="button-dark"><i data-lucide="log-out" class="w-4 h-4"></i> Sign out</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div id="admin-summary" class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8"></div>
+        <div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+          <div class="p-4 sm:p-5 border-b border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div class="flex flex-wrap gap-2" role="tablist" aria-label="Resource status">
+              <button class="admin-tab active" data-status="all" role="tab">All</button>
+              <button class="admin-tab" data-status="pending" role="tab">Pending</button>
+              <button class="admin-tab" data-status="published" role="tab">Published</button>
+              <button class="admin-tab" data-status="archived" role="tab">Archived</button>
+            </div>
+            <div class="relative md:w-72">
+              <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-3"></i>
+              <input id="admin-search" type="search" class="form-control pl-9" placeholder="Search managed resources">
+            </div>
+          </div>
+          <div id="admin-resource-list" class="divide-y divide-slate-200"></div>
+          <div id="admin-empty" class="hidden p-12 text-center text-sm text-slate-500">No resources match this view.</div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="bg-slate-950 text-slate-400 py-10 border-t border-slate-800 mt-auto">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-5">
+      <div class="flex items-center gap-3">
+        <img src="https://account.ncme.org/images/My_Images/NCME-Logo-F.png" alt="" class="h-9 w-auto bg-white rounded px-2 py-1">
+        <span class="font-bold text-white">Classroom Assessment Commons</span>
+      </div>
+      <p class="text-xs sm:text-sm text-center">&copy; 2026 National Council on Measurement in Education. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <button id="reviewer-access-button" class="fixed bottom-6 right-6 bg-slate-800 text-white px-4 py-3 rounded-full shadow-2xl hover:bg-slate-700 transition z-30 flex items-center gap-2 font-semibold text-sm">
+    <i data-lucide="lock" class="w-5 h-5"></i><span class="hidden sm:inline">Reviewer access</span>
+  </button>
+
+  <div id="modal-backdrop" class="modal-backdrop hidden" aria-hidden="true"></div>
+
+  <section id="login-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="login-title">
+    <div class="modal-card max-w-md">
+      <div class="modal-header">
+        <div><p class="eyebrow">Secure area</p><h2 id="login-title" class="modal-title">Reviewer access</h2></div>
+        <button class="icon-button modal-close" aria-label="Close"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      <form id="login-form" class="modal-body space-y-5">
+        <div class="rounded-xl bg-blue-50 border border-blue-100 p-4 text-sm text-blue-900">Use the shared reviewer password provided by the Classroom Assessment Committee.</div>
+        <div>
+          <label class="form-label" for="reviewer-password">Password</label>
+          <input id="reviewer-password" type="password" class="form-control" autocomplete="current-password" required>
+        </div>
+        <p id="login-error" class="hidden text-sm text-red-700" role="alert"></p>
+        <button id="login-submit" type="submit" class="button-primary w-full justify-center">Sign in</button>
+      </form>
+    </div>
+  </section>
+
+  <section id="submission-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="submission-title">
+    <div class="modal-card max-w-3xl">
+      <div class="modal-header">
+        <div><p class="eyebrow">Community contribution</p><h2 id="submission-title" class="modal-title">Submit a resource</h2></div>
+        <button class="icon-button modal-close" aria-label="Close"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      <form id="submission-form" class="modal-body space-y-5">
+        <p class="text-sm text-slate-600">Submissions are reviewed before appearing in the public catalog.</p>
+        <div class="grid md:grid-cols-2 gap-4">
+          <div><label class="form-label" for="submission-title-input">Resource title *</label><input id="submission-title-input" class="form-control" required maxlength="240"></div>
+          <div><label class="form-label" for="submission-url">Resource URL *</label><input id="submission-url" type="url" class="form-control" required></div>
+          <div><label class="form-label" for="submission-name">Your name *</label><input id="submission-name" class="form-control" required maxlength="160"></div>
+          <div><label class="form-label" for="submission-email">Your email *</label><input id="submission-email" type="email" class="form-control" required maxlength="240"></div>
+          <div><label class="form-label" for="submission-provider">Provider or organization</label><input id="submission-provider" class="form-control" maxlength="200"></div>
+          <div><label class="form-label" for="submission-type">Resource type</label><select id="submission-type" class="form-control"><option>Document</option><option>Website</option><option>Video</option><option>Podcast</option><option>Toolkit</option><option>Course</option><option>Journal Article</option></select></div>
+        </div>
+        <div><label class="form-label" for="submission-rationale">Why should this resource be included? *</label><textarea id="submission-rationale" rows="4" class="form-control" required maxlength="2000"></textarea></div>
+        <div class="modal-actions"><button type="button" class="button-muted modal-close">Cancel</button><button id="submission-save" type="submit" class="button-primary">Send for review</button></div>
+      </form>
+    </div>
+  </section>
+
+  <section id="resource-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="resource-modal-title">
+    <div class="modal-card max-w-4xl">
+      <div class="modal-header">
+        <div><p class="eyebrow">Resource record</p><h2 id="resource-modal-title" class="modal-title">Add resource</h2></div>
+        <button class="icon-button modal-close" aria-label="Close"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      <form id="resource-form" class="modal-body space-y-5">
+        <input id="resource-id" type="hidden">
+        <div class="grid md:grid-cols-2 gap-4">
+          <div><label class="form-label" for="resource-title">Title *</label><input id="resource-title" class="form-control" required maxlength="240"></div>
+          <div><label class="form-label" for="resource-url">URL *</label><input id="resource-url" type="url" class="form-control" required></div>
+          <div><label class="form-label" for="resource-provider">Provider *</label><input id="resource-provider" class="form-control" required maxlength="200"></div>
+          <div><label class="form-label" for="resource-length">Length or format detail</label><input id="resource-length" class="form-control" maxlength="100" placeholder="e.g., 20 pages or self-paced module"></div>
+          <div><label class="form-label" for="resource-type">Resource type</label><select id="resource-type" class="form-control"><option>Document</option><option>Website</option><option>Video</option><option>Podcast</option><option>Toolkit</option><option>Course</option><option>Journal Article</option></select></div>
+          <div><label class="form-label" for="resource-status">Publication status</label><select id="resource-status" class="form-control"><option value="pending">Pending review</option><option value="published">Published</option><option value="archived">Archived</option></select></div>
+        </div>
+        <div><label class="form-label" for="resource-summary">Description or practical use *</label><textarea id="resource-summary" rows="4" class="form-control" required maxlength="2000"></textarea></div>
+        <div class="grid md:grid-cols-2 gap-4">
+          <div><label class="form-label" for="resource-audience">Audiences</label><input id="resource-audience" class="form-control" placeholder="Teacher, Administrator, Researcher"><p class="form-help">Separate entries with commas.</p></div>
+          <div><label class="form-label" for="resource-topics">Topics</label><input id="resource-topics" class="form-control" placeholder="Formative Assessment, Feedback"><p class="form-help">Separate entries with commas.</p></div>
+          <div><label class="form-label" for="resource-grades">Grade ranges</label><input id="resource-grades" class="form-control" placeholder="All Grades, Higher Education"><p class="form-help">Separate entries with commas.</p></div>
+          <div><label class="form-label" for="resource-assessment-types">Assessment types</label><input id="resource-assessment-types" class="form-control" placeholder="Formative Assessment, Summative Assessment"><p class="form-help">Separate entries with commas.</p></div>
+        </div>
+        <div class="modal-actions"><button type="button" class="button-muted modal-close">Cancel</button><button id="resource-save" type="submit" class="button-primary">Save resource</button></div>
+      </form>
+    </div>
+  </section>
+
+  <section id="rating-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="rating-modal-title">
+    <div class="modal-card max-w-2xl">
+      <div class="modal-header">
+        <div><p class="eyebrow">Evaluation checklist</p><h2 id="rating-modal-title" class="modal-title">Rate resource</h2><p id="rating-resource-name" class="text-xs text-slate-500 mt-1"></p></div>
+        <button class="icon-button modal-close" aria-label="Close"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      <form id="rating-form" class="modal-body space-y-5">
+        <input id="rating-id" type="hidden"><input id="rating-resource-id" type="hidden">
+        <div><label class="form-label" for="rating-reviewer">Reviewer name *</label><input id="rating-reviewer" class="form-control" required maxlength="160"></div>
+        <div id="rating-criteria" class="space-y-4"></div>
+        <div><label class="form-label" for="rating-notes">Evaluation comments</label><textarea id="rating-notes" rows="4" class="form-control" maxlength="3000"></textarea></div>
+        <div class="flex items-center justify-between border-t border-slate-200 pt-5"><p id="rating-total" class="text-sm font-bold text-slate-700">Total: 0 / 20</p><div class="flex gap-2"><button type="button" class="button-muted modal-close">Cancel</button><button id="rating-save" type="submit" class="button-primary">Save rating</button></div></div>
+      </form>
+    </div>
+  </section>
+
+  <section id="details-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="details-modal-title">
+    <div class="modal-card max-w-4xl">
+      <div class="modal-header">
+        <div><p class="eyebrow">Ratings and notes</p><h2 id="details-modal-title" class="modal-title">Resource details</h2><p id="details-resource-name" class="text-xs text-slate-500 mt-1"></p></div>
+        <button class="icon-button modal-close" aria-label="Close"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      <div class="modal-body space-y-8">
+        <section><div class="flex items-center justify-between gap-4 mb-4"><h3 class="font-bold text-slate-900">Ratings</h3><button id="details-add-rating" class="button-secondary text-xs"><i data-lucide="plus" class="w-4 h-4"></i> Add rating</button></div><div id="details-ratings" class="space-y-3"></div></section>
+        <section class="border-t border-slate-200 pt-6"><h3 class="font-bold text-slate-900 mb-4">Internal notes</h3><form id="note-form" class="grid sm:grid-cols-[180px_1fr_auto] gap-3 items-start"><input id="note-resource-id" type="hidden"><input id="note-author" class="form-control" placeholder="Your name" required maxlength="160"><textarea id="note-text" rows="2" class="form-control" placeholder="Add an internal note" required maxlength="3000"></textarea><button type="submit" class="button-primary justify-center">Add note</button></form><div id="details-notes" class="space-y-3 mt-5"></div></section>
+      </div>
+    </div>
+  </section>
+
+  <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
+
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
