@@ -19,8 +19,8 @@
       <button id="home-button" class="flex items-center gap-4 text-left min-w-0" aria-label="Return to the public resource catalog">
         <img src="https://ncme.org/wp-content/uploads/2025/08/cropped-NCME-Logo-F-500x153.jpg" alt="NCME" class="h-12 sm:h-14 w-auto object-contain">
         <div class="hidden sm:block min-w-0 border-l border-slate-200 pl-4">
-          <h1 class="font-extrabold text-lg leading-tight text-slate-900 tracking-tight">Classroom Assessment Commons</h1>
-          <p class="text-[10px] font-bold text-blue-800 uppercase tracking-widest mt-1">Curated Resource Repository</p>
+          <span class="block font-extrabold text-lg leading-tight text-slate-900 tracking-tight">Classroom Assessment Commons</span>
+          <span class="block text-[10px] font-bold text-blue-800 uppercase tracking-widest mt-1">Curated Resource Repository</span>
         </div>
       </button>
       <nav class="flex items-center gap-2 sm:gap-4 text-sm font-semibold" aria-label="Primary navigation">
@@ -43,47 +43,62 @@
     </div>
 
     <section id="public-view">
-      <div class="hero-panel text-white border-b border-blue-900">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 sm:py-16 relative">
-          <div class="max-w-3xl">
-            <p class="text-blue-200 text-xs font-bold tracking-[0.22em] uppercase mb-4">Evidence-informed assessment practice</p>
-            <h2 class="text-3xl sm:text-5xl font-extrabold tracking-tight leading-tight">Find classroom assessment resources you can trust.</h2>
-            <p class="text-blue-100/90 mt-5 text-base sm:text-lg leading-relaxed max-w-2xl">Explore practical tools, professional learning, and open scholarship curated for educators, leaders, researchers, and policymakers.</p>
+      <div class="hero-panel border-b border-slate-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-14 relative">
+          <div class="max-w-4xl">
+            <p class="hero-eyebrow">National Council on Measurement in Education</p>
+            <h1 class="hero-title">Classroom Assessment Commons</h1>
+            <p class="hero-lede">Evidence-informed resources for thoughtful assessment practice, selected for educators, leaders, researchers, policymakers, students, and families.</p>
           </div>
-          <section class="mt-11" aria-labelledby="prelearning-heading">
+
+          <aside class="orientation-callout mt-8 max-w-5xl" aria-labelledby="orientation-heading">
+            <span class="orientation-icon" aria-hidden="true"><i data-lucide="compass" class="w-5 h-5"></i></span>
+            <div>
+              <h2 id="orientation-heading">Start with purpose</h2>
+              <p>Before you explore, take a moment to consider what strong assessment makes possible: clearer learning goals, meaningful evidence, responsive next steps, and greater learner agency. Choose the pathway that best matches your work, then carry that lens into the resources below.</p>
+            </div>
+          </aside>
+
+          <section class="mt-10" aria-labelledby="prelearning-heading">
             <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-3 mb-5">
               <div>
-                <h3 id="prelearning-heading" class="text-xl font-bold tracking-tight">Pre-Learning Pathway Navigation</h3>
-                <p class="text-xs text-slate-400 mt-1">Select your role to explore essential concepts and tailored resources.</p>
+                <h2 id="prelearning-heading" class="brand-section-heading">Pre-Learning Pathway Navigation</h2>
+                <p class="text-sm text-slate-600 mt-2">Select your role to begin with concepts and resources chosen for your context.</p>
               </div>
-              <button id="clear-pathway" class="hidden text-xs text-blue-300 hover:text-white hover:underline items-center gap-1">
+              <button id="clear-pathway" class="hidden text-xs font-bold text-blue-700 hover:text-blue-900 hover:underline items-center gap-1">
                 <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Clear pathway filter
               </button>
             </div>
-            <div id="prelearning-pathways" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div id="prelearning-pathways" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
               <button class="pathway-card text-left" data-pathway="teachers" data-audiences="Teacher">
-                <span class="pathway-icon bg-blue-500/10 text-blue-400"><i data-lucide="book-open" class="w-5 h-5"></i></span>
-                <span class="block font-bold text-white mt-4">Welcome, Teachers</span>
-                <span class="block text-xs text-slate-400 mt-1.5 leading-relaxed">Learn formative assessment practices to integrate into lesson plans seamlessly.</span>
-                <span class="pathway-link text-blue-400">Explore Guides <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i></span>
+                <span class="pathway-icon"><i data-lucide="book-open" class="w-5 h-5"></i></span>
+                <span class="pathway-card-title">Welcome, Teachers</span>
+                <span class="pathway-card-description">Use evidence during learning to clarify goals, respond to student thinking, and plan helpful next steps.</span>
+                <span class="pathway-link">Explore Guides <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i></span>
               </button>
-              <button class="pathway-card text-left" data-pathway="administrators" data-audiences="Building Administrator|District Administrator|Instructional Coach">
-                <span class="pathway-icon bg-indigo-500/10 text-indigo-400"><i data-lucide="building-2" class="w-5 h-5"></i></span>
-                <span class="block font-bold text-white mt-4">Welcome, Administrators</span>
-                <span class="block text-xs text-slate-400 mt-1.5 leading-relaxed">Support teacher instruction strategies, professional learning, and balanced systems.</span>
-                <span class="pathway-link text-indigo-400">Explore Strategy <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i></span>
+              <button class="pathway-card text-left" data-pathway="administrators" data-audiences="Administrator|Building Administrator|District Administrator|Instructional Coach">
+                <span class="pathway-icon"><i data-lucide="building-2" class="w-5 h-5"></i></span>
+                <span class="pathway-card-title">Welcome, Administrators</span>
+                <span class="pathway-card-description">Build the conditions for assessment literacy, collaborative learning, and coherent assessment systems.</span>
+                <span class="pathway-link">Explore Strategy <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i></span>
               </button>
               <button class="pathway-card text-left" data-pathway="policymakers" data-audiences="Policymaker">
-                <span class="pathway-icon bg-purple-500/10 text-purple-400"><i data-lucide="landmark" class="w-5 h-5"></i></span>
-                <span class="block font-bold text-white mt-4">Welcome, Policymakers</span>
-                <span class="block text-xs text-slate-400 mt-1.5 leading-relaxed">Examine accountability frameworks, statewide results, and policy reporting.</span>
-                <span class="pathway-link text-purple-400">Explore Policy <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i></span>
+                <span class="pathway-icon"><i data-lucide="landmark" class="w-5 h-5"></i></span>
+                <span class="pathway-card-title">Welcome, Policymakers</span>
+                <span class="pathway-card-description">Consider how policy, reporting, and system design can support appropriate and equitable assessment use.</span>
+                <span class="pathway-link">Explore Policy <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i></span>
               </button>
               <button class="pathway-card text-left" data-pathway="families" data-audiences="Student/Family|Public">
-                <span class="pathway-icon bg-amber-500/10 text-amber-400"><i data-lucide="users" class="w-5 h-5"></i></span>
-                <span class="block font-bold text-white mt-4">Students &amp; Families</span>
-                <span class="block text-xs text-slate-400 mt-1.5 leading-relaxed">Guides on learning benchmarks, score reporting, and assessment clarity.</span>
-                <span class="pathway-link text-amber-400">Explore Guides <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i></span>
+                <span class="pathway-icon"><i data-lucide="users" class="w-5 h-5"></i></span>
+                <span class="pathway-card-title">Students &amp; Families</span>
+                <span class="pathway-card-description">Make sense of learning goals, assessment information, score reports, and productive questions to ask.</span>
+                <span class="pathway-link">Explore Guides <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i></span>
+              </button>
+              <button class="pathway-card text-left" data-pathway="higher-education" data-audiences="Teacher Educator|Researcher|Assessment Professional|Assessment Specialist|Assessment Developer|Student Teacher">
+                <span class="pathway-icon"><i data-lucide="graduation-cap" class="w-5 h-5"></i></span>
+                <span class="pathway-card-title">Professional Studies &amp; Higher Education</span>
+                <span class="pathway-card-description">Connect scholarship, professional preparation, measurement, and classroom practice across learning settings.</span>
+                <span class="pathway-link">Explore Scholarship <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i></span>
               </button>
             </div>
           </section>
@@ -95,7 +110,7 @@
         <section class="quality-standards-panel mb-8" aria-labelledby="quality-standards-heading">
           <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
             <div>
-              <h2 id="quality-standards-heading" class="font-bold text-slate-900 text-sm tracking-tight uppercase">NCME Classroom Assessment Quality Standards</h2>
+              <h2 id="quality-standards-heading" class="brand-section-heading compact">NCME Classroom Assessment Quality Standards</h2>
               <p class="text-xs text-slate-500 mt-1">Resources are evaluated through the CAC 20-Point Quality Checklist. A seal is awarded after at least three peer ratings.</p>
             </div>
             <span class="text-xs text-slate-500 bg-white border border-slate-200 px-3 py-1 rounded-full font-medium">Peer Evaluated</span>
@@ -131,7 +146,7 @@
             <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-6">
               <div>
                 <p class="text-xs font-bold text-blue-700 uppercase tracking-wider">Resource catalog</p>
-                <h2 id="catalog-heading" class="text-2xl font-extrabold text-slate-900 mt-1">Explore the Commons</h2>
+                <h2 id="catalog-heading" class="brand-section-heading text-2xl mt-1">Explore the Commons</h2>
                 <p id="result-count" class="text-sm font-semibold text-slate-500 mt-2" aria-live="polite"></p>
               </div>
               <div class="flex items-center gap-2">

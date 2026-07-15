@@ -147,9 +147,9 @@
   }
 
   function summaryTile(value, label, extraClass) {
-    return '<div class="bg-white/10 border border-white/15 backdrop-blur rounded-xl p-4 ' + (extraClass || '') + '">' +
-      '<div class="text-2xl font-extrabold">' + escapeHtml(String(value)) + '</div>' +
-      '<div class="text-xs text-blue-100 mt-1">' + escapeHtml(label) + '</div></div>';
+    return '<div class="summary-tile ' + (extraClass || '') + '">' +
+      '<div class="summary-value">' + escapeHtml(String(value)) + '</div>' +
+      '<div class="summary-label">' + escapeHtml(label) + '</div></div>';
   }
 
   function renderFilterControls() {
