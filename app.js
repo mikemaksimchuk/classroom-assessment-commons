@@ -7,10 +7,58 @@
   var adminResources = [];
   var adminRatings = [];
   var adminNotes = [];
+  var usageSummary = null;
   var activeAdminStatus = 'all';
   var activePathway = null;
   var currentDetailsResourceId = null;
   var toastTimer = null;
+
+  var pathwayResources = {
+    teachers: {
+      title: 'Teachers',
+      intro: 'Begin with practical resources that connect formative assessment, ambitious teaching, and student-centered assessment methods.',
+      resources: [
+        { title: 'What Teachers Need to Know About the Formative Assessment Process', url: 'https://famemichigan.org/wp-content/uploads/2020/09/KA_04Teachers_4pg.pdf' },
+        { title: 'ALN Presentation: How Does the Formative Assessment Process Support Ambitious Teaching and Vice Versa?', url: 'https://vimeo.com/681042346/f00c65ed88' },
+        { title: 'What Types of Assessment Methods Support Student-Centered Instruction?', url: 'https://www.michiganassessmentconsortium.org/wp-content/uploads/LP-ASSESSMENT-METHODS-FOR-STUDENT-CENTERED-INSTRUCTION.pdf' }
+      ]
+    },
+    administrators: {
+      title: 'Administrators',
+      intro: 'Explore concise guidance for leading formative assessment and building thoughtful, balanced assessment systems.',
+      resources: [
+        { title: 'What Administrators Need to Know About the Formative Assessment Process', url: 'https://famemichigan.org/wp-content/uploads/2020/02/KA_02_Administrators_4pg.pdf' },
+        { title: 'Formative Assessment or Formative Assessments: The “S” Makes a Difference', url: 'https://www.michiganassessmentconsortium.org/wp-content/uploads/LP-FORMATIVE-ASSESSMENT-VS-ASSESSMENTS.pdf' },
+        { title: 'A Thoughtful Educator’s Guide to Interim/Benchmark Assessment', url: 'https://www.michiganassessmentconsortium.org/wp-content/uploads/BBAF-Interim-Benchmark-Guide.pdf' }
+      ]
+    },
+    policymakers: {
+      title: 'Policymakers',
+      intro: 'Consider how assessment policy and system design can positively influence teaching, learning, and balanced assessment practice.',
+      resources: [
+        { title: 'What Local and State Policymakers Need to Know About the Formative Assessment Process', url: 'https://famemichigan.org/wp-content/uploads/2019/10/KnowAbout_01_Policymakers_4pp.pdf' },
+        { title: 'Assessment as a Positive Influence on 21st Century Teaching and Learning', url: 'https://www.michiganassessmentconsortium.org/wp-content/uploads/Assessment-as-a-Positive-Influence.pdf' },
+        { title: 'What Constitutes a High-Quality, Comprehensive, Balanced Assessment System?', url: 'https://www.michiganassessmentconsortium.org/wp-content/uploads/3-Dec16-2016_Dec_ALN-LEARNING_POINT_BALANCED-2.pdf' }
+      ]
+    },
+    families: {
+      title: 'Students & Families',
+      intro: 'Use this short guide to understand how formative assessment supports learning and meaningful student participation.',
+      resources: [
+        { title: 'What Students and Their Families Need to Know About the Formative Assessment Process', url: 'https://famemichigan.org/wp-content/uploads/2020/06/KnowAbout_03StudentsFamilies_4pg_v3.pdf' }
+      ]
+    },
+    'higher-education': {
+      title: 'Professional Studies & Higher Education',
+      intro: 'Examine foundational ideas in assessment for learning, assessment literacy, formative assessment, and balanced assessment systems.',
+      resources: [
+        { title: 'What Do We Mean by Assessment for Learning?', url: 'https://www.michiganassessmentconsortium.org/wp-content/uploads/Sept2017_LearningPoint_FormativeAssessment-1.pdf' },
+        { title: 'What Fundamental Understandings Are Necessary for Assessment Literacy?', url: 'https://www.michiganassessmentconsortium.org/wp-content/uploads/2018_Nov_FUNDAMENTAL_UNDERSTANDINGS_ASSESSMENT_LITERACY-3.pdf' },
+        { title: 'What Do We Mean by Formative Assessment?', url: 'https://www.michiganassessmentconsortium.org/wp-content/uploads/Sept2017_LearningPoint_FormativeAssessment-1.pdf' },
+        { title: 'What Constitutes a High-Quality, Comprehensive, Balanced Assessment System?', url: 'https://www.michiganassessmentconsortium.org/wp-content/uploads/3-Dec16-2016_Dec_ALN-LEARNING_POINT_BALANCED-2.pdf' }
+      ]
+    }
+  };
 
   var ratingDefinitions = [
     { key: 'alignment', label: '1. Alignment to NCME Standards', description: 'Alignment with foundational measurement principles, including validity, reliability, and fairness.' },
@@ -44,6 +92,7 @@
     client = window.supabase.createClient(config.SUPABASE_URL, key, {
       auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: false }
     });
+    recordSiteVisit();
     client.auth.getSession().then(function (result) {
       session = result.data.session;
       updateAccessButton();
@@ -74,7 +123,6 @@
     document.getElementById('catalog-search').addEventListener('input', renderPublicCatalog);
     document.getElementById('catalog-sort').addEventListener('change', renderPublicCatalog);
     document.getElementById('prelearning-pathways').addEventListener('click', handlePathwaySelection);
-    document.getElementById('clear-pathway').addEventListener('click', clearPathwayFilter);
     document.getElementById('admin-search').addEventListener('input', renderAdminResources);
     document.getElementById('login-form').addEventListener('submit', handleLogin);
     document.getElementById('submission-form').addEventListener('submit', handleSubmission);
@@ -110,7 +158,7 @@
   async function loadPublicResources() {
     setPublicLoading(true);
     var result = await client.from('resources')
-      .select('id,title,url,provider,summary,length,resource_type,audience,topics,grade_ranges,assessment_types,ratings_count,average_score,seal,created_at')
+      .select('id,title,url,provider,summary,length,resource_type,audience,topics,grade_ranges,assessment_types,ratings_count,average_score,seal,review_bypassed,published_date,included_date,created_at')
       .eq('status', 'published').order('title', { ascending: true });
     if (result.error) {
       setPublicLoading(false);
@@ -227,6 +275,8 @@
     }
     var safeUrl = sanitizeUrl(resource.url);
     var tags = (resource.topics || []).slice(0, 3).concat((resource.audience || []).slice(0, 2));
+    var ratingText = resource.review_bypassed ? 'Expedited Gold approval' : Number(resource.ratings_count || 0) + ' verified rating' +
+      (Number(resource.ratings_count || 0) === 1 ? '' : 's');
     card.innerHTML =
       '<div class="flex items-start justify-between gap-4 mb-4">' +
         '<div class="p-2.5 bg-blue-50 text-blue-700 rounded-xl"><i data-lucide="' + iconForType(resource.resource_type) + '" class="w-5 h-5"></i></div>' +
@@ -236,18 +286,23 @@
         '" target="_blank" rel="noopener noreferrer">' + escapeHtml(resource.title) + '<span class="sr-only"> (opens in a new tab)</span></a></h3>' +
       '<p class="text-xs font-semibold text-slate-500 mt-2">Provider: <span class="text-slate-700">' + escapeHtml(resource.provider) + '</span></p>' +
       '<p class="text-sm text-slate-600 leading-relaxed mt-4 flex-grow">' + escapeHtml(resource.summary) + '</p>' +
-      '<div class="mt-5 pt-4 border-t border-slate-100"><div class="flex items-center justify-between gap-3 mb-3 text-xs text-slate-400">' +
-        '<span>' + escapeHtml(resource.length || 'Length not specified') + '</span><span>' + Number(resource.ratings_count || 0) + ' verified rating' +
-        (Number(resource.ratings_count || 0) === 1 ? '' : 's') + '</span></div><div class="flex flex-wrap gap-1.5">' +
+      '<div class="mt-5 pt-4 border-t border-slate-100"><div class="flex items-center justify-between gap-3 mb-2 text-xs text-slate-400">' +
+        '<span>' + escapeHtml(resource.length || 'Length not specified') + '</span><span>' + escapeHtml(ratingText) + '</span></div>' +
+      '<div class="resource-dates mb-3">' + resourceDateMetadata(resource) + '</div><div class="flex flex-wrap gap-1.5">' +
         tags.map(function (tag) { return '<span class="tag">' + escapeHtml(tag) + '</span>'; }).join('') + '</div></div>';
     return card;
+  }
+
+  function resourceDateMetadata(resource) {
+    var dates = [];
+    if (resource.published_date) dates.push('Originally published ' + formatDateOnly(resource.published_date));
+    if (resource.included_date) dates.push('Included ' + formatDateOnly(resource.included_date));
+    return dates.length ? dates.map(function (date) { return '<span>' + escapeHtml(date) + '</span>'; }).join('<span aria-hidden="true">·</span>') : '';
   }
 
   function clearFilters() {
     document.getElementById('catalog-search').value = '';
     Array.prototype.forEach.call(document.querySelectorAll('[data-filter-key]'), function (input) { input.checked = false; });
-    activePathway = null;
-    updatePathwayUI();
     renderPublicCatalog();
   }
 
@@ -255,23 +310,17 @@
     var card = event.target.closest('[data-pathway]');
     if (!card) return;
     activePathway = card.getAttribute('data-pathway');
-    var audiences = (card.getAttribute('data-audiences') || '').split('|').filter(Boolean);
-    document.getElementById('catalog-search').value = '';
-    Array.prototype.forEach.call(document.querySelectorAll('[data-filter-key]'), function (input) {
-      input.checked = input.getAttribute('data-filter-key') === 'audience' && audiences.indexOf(input.value) !== -1;
-    });
+    var pathway = pathwayResources[activePathway];
+    if (!pathway) return;
     updatePathwayUI();
-    renderPublicCatalog();
-    document.getElementById('quality-standards-heading').scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }
-
-  function clearPathwayFilter() {
-    activePathway = null;
-    Array.prototype.forEach.call(document.querySelectorAll('[data-filter-key="audience"]'), function (input) {
-      input.checked = false;
-    });
-    updatePathwayUI();
-    renderPublicCatalog();
+    document.getElementById('pathway-modal-title').textContent = pathway.title;
+    document.getElementById('pathway-modal-intro').textContent = pathway.intro;
+    document.getElementById('pathway-resource-list').innerHTML = pathway.resources.map(function (resource, index) {
+      return '<article class="pathway-resource-item"><span class="pathway-resource-number">' + (index + 1) + '</span><div>' +
+        '<h3>' + escapeHtml(resource.title) + '</h3><a href="' + escapeAttribute(sanitizeUrl(resource.url)) + '" target="_blank" rel="noopener noreferrer">' +
+        'Open resource <i data-lucide="external-link" class="w-3.5 h-3.5"></i><span class="sr-only"> (opens in a new tab)</span></a></div></article>';
+    }).join('');
+    openModal('pathway-modal');
   }
 
   function updatePathwayUI() {
@@ -280,9 +329,6 @@
       card.classList.toggle('active', selected);
       card.setAttribute('aria-pressed', selected ? 'true' : 'false');
     });
-    var clearButton = document.getElementById('clear-pathway');
-    clearButton.classList.toggle('hidden', !activePathway);
-    clearButton.classList.toggle('flex', Boolean(activePathway));
   }
 
   function sortPublicResources(resources, mode) {
@@ -291,7 +337,7 @@
       if (mode === 'provider') {
         return String(a.provider || '').localeCompare(String(b.provider || '')) || String(a.title || '').localeCompare(String(b.title || ''));
       }
-      if (mode === 'newest') return new Date(b.created_at || 0) - new Date(a.created_at || 0);
+      if (mode === 'newest') return new Date(b.included_date || b.created_at || 0) - new Date(a.included_date || a.created_at || 0);
       var sealRank = { Gold: 2, Silver: 1 };
       var rankDifference = (sealRank[b.seal] || 0) - (sealRank[a.seal] || 0);
       if (rankDifference) return rankDifference;
@@ -333,6 +379,7 @@
     adminResources = [];
     adminRatings = [];
     adminNotes = [];
+    usageSummary = null;
     updateAccessButton();
     showPublicView();
     await loadPublicResources();
@@ -378,14 +425,21 @@
     adminResources = results[0].data || [];
     adminRatings = results[1].data || [];
     adminNotes = results[2].data || [];
+    var usageResult = await client.rpc('get_usage_summary');
+    if (!usageResult.error) {
+      usageSummary = Array.isArray(usageResult.data) ? usageResult.data[0] : usageResult.data;
+    } else {
+      usageSummary = null;
+    }
     renderAdminSummary();
+    renderUsageSummary(usageResult.error);
     renderAdminResources();
   }
 
   function renderAdminSummary() {
     var published = adminResources.filter(function (item) { return item.status === 'published'; }).length;
     var pending = adminResources.filter(function (item) { return item.status === 'pending'; }).length;
-    var reviewed = adminResources.filter(function (item) { return Number(item.ratings_count) >= 3; }).length;
+    var reviewed = adminResources.filter(function (item) { return Number(item.ratings_count) >= 3 || item.review_bypassed; }).length;
     document.getElementById('admin-summary').innerHTML =
       adminSummaryCard(adminResources.length, 'Total resources', 'library') +
       adminSummaryCard(published, 'Published', 'globe-2') +
@@ -398,6 +452,25 @@
     return '<div class="bg-white border border-slate-200 rounded-xl p-4 sm:p-5 shadow-sm"><div class="flex items-center justify-between">' +
       '<div><p class="text-2xl font-extrabold text-slate-900">' + value + '</p><p class="text-xs text-slate-500 mt-1">' + escapeHtml(label) + '</p></div>' +
       '<div class="p-2.5 bg-blue-50 text-blue-700 rounded-xl"><i data-lucide="' + icon + '" class="w-5 h-5"></i></div></div></div>';
+  }
+
+  function renderUsageSummary(error) {
+    var container = document.getElementById('admin-usage-summary');
+    if (error || !usageSummary) {
+      container.innerHTML = '<div class="usage-unavailable lg:col-span-4">Usage tracking will begin after the included Supabase migration is run.</div>';
+      return;
+    }
+    container.innerHTML =
+      usageSummaryCard(usageSummary.total_visits, 'Total visits', 'mouse-pointer-click') +
+      usageSummaryCard(usageSummary.unique_browsers, 'Unique browsers', 'monitor-smartphone') +
+      usageSummaryCard(usageSummary.visits_30_days, 'Visits, last 30 days', 'calendar-days') +
+      usageSummaryCard(usageSummary.visits_7_days, 'Visits, last 7 days', 'activity');
+    refreshIcons();
+  }
+
+  function usageSummaryCard(value, label, icon) {
+    return '<div class="usage-summary-card"><i data-lucide="' + icon + '" class="w-4 h-4"></i><strong>' +
+      Number(value || 0).toLocaleString() + '</strong><span>' + escapeHtml(label) + '</span></div>';
   }
 
   function renderAdminResources() {
@@ -416,14 +489,17 @@
         '<p class="text-xs text-amber-700 mt-2">Submitted by ' + escapeHtml(resource.submitter_name) +
         (resource.submitter_email ? ' (' + escapeHtml(resource.submitter_email) + ')' : '') + '</p>' : '';
       var ratingLabel = Number(resource.ratings_count || 0) + ' rating' + (Number(resource.ratings_count || 0) === 1 ? '' : 's');
+      if (resource.review_bypassed) ratingLabel = 'Expedited Gold approval';
       var average = resource.average_score === null ? 'No average' : Number(resource.average_score).toFixed(1) + ' / 20';
+      var dates = '<span class="admin-resource-dates">Published: ' + escapeHtml(formatDateOnly(resource.published_date, 'Unknown')) +
+        ' · Included: ' + escapeHtml(formatDateOnly(resource.included_date, 'Not yet included')) + '</span>';
       row.innerHTML =
         '<div class="flex flex-col xl:flex-row xl:items-center justify-between gap-5"><div class="min-w-0 flex-1">' +
         '<div class="flex flex-wrap items-center gap-2 mb-2"><span class="status-pill status-' + escapeAttribute(resource.status) + '">' + escapeHtml(resource.status) + '</span>' +
         (resource.seal ? '<span class="status-pill ' + (resource.seal === 'Gold' ? 'bg-amber-100 text-amber-800' : 'bg-slate-200 text-slate-700') + '">' + escapeHtml(resource.seal) + '</span>' : '') +
         '</div><h3 class="font-bold text-slate-900">' + escapeHtml(resource.title) + '</h3>' +
         '<p class="text-xs text-slate-500 mt-1">' + escapeHtml(resource.provider) + ' · ' + escapeHtml(resource.resource_type) + ' · ' +
-        escapeHtml(ratingLabel) + ' · ' + escapeHtml(average) + '</p>' + submitter + '</div>' +
+        escapeHtml(ratingLabel) + ' · ' + escapeHtml(average) + '</p><p class="text-xs text-slate-500 mt-1">' + dates + '</p>' + submitter + '</div>' +
         '<div class="flex flex-wrap gap-2 xl:justify-end"><button class="button-secondary text-xs" data-action="details" data-id="' + resource.id + '">' +
         '<i data-lucide="messages-square" class="w-4 h-4"></i> Ratings and notes</button>' +
         '<button class="button-muted text-xs" data-action="edit" data-id="' + resource.id + '"><i data-lucide="pencil" class="w-4 h-4"></i> Edit</button>' +
@@ -437,7 +513,8 @@
   }
 
   function statusActionButtons(resource) {
-    if (resource.status === 'pending') return '<button class="button-primary text-xs" data-action="publish" data-id="' + resource.id + '"><i data-lucide="check" class="w-4 h-4"></i> Publish</button>';
+    if (resource.status === 'pending') return '<button class="button-primary text-xs" data-action="publish" data-id="' + resource.id + '"><i data-lucide="check" class="w-4 h-4"></i> Publish</button>' +
+      '<button class="button-expedited text-xs" data-action="bypass-approve" data-id="' + resource.id + '"><i data-lucide="badge-check" class="w-4 h-4"></i> Bypass review and approve</button>';
     if (resource.status === 'published') return '<button class="button-muted text-xs" data-action="archive" data-id="' + resource.id + '"><i data-lucide="archive" class="w-4 h-4"></i> Archive</button>';
     return '<button class="button-primary text-xs" data-action="publish" data-id="' + resource.id + '"><i data-lucide="rotate-ccw" class="w-4 h-4"></i> Republish</button>';
   }
@@ -452,6 +529,7 @@
     if (action === 'edit') return openResourceEditor(resource);
     if (action === 'details') return openDetails(id);
     if (action === 'publish') return updateResourceStatus(id, 'published');
+    if (action === 'bypass-approve') return bypassReviewAndApprove(resource);
     if (action === 'archive') return updateResourceStatus(id, 'archived');
     if (action === 'delete') {
       if (!window.confirm('Permanently delete "' + resource.title + '" and all of its ratings and notes?')) return;
@@ -463,9 +541,20 @@
   }
 
   async function updateResourceStatus(id, status) {
-    var result = await client.from('resources').update({ status: status }).eq('id', id);
+    var resource = adminResources.find(function (item) { return item.id === id; });
+    var payload = { status: status };
+    if (status === 'published' && resource && !resource.included_date) payload.included_date = todayIso();
+    var result = await client.from('resources').update(payload).eq('id', id);
     if (result.error) return showToast(result.error.message, 'error');
     showToast(status === 'published' ? 'Resource published.' : 'Resource archived.', 'success');
+    await reloadAfterAdminChange();
+  }
+
+  async function bypassReviewAndApprove(resource) {
+    if (!window.confirm('Approve “' + resource.title + '” without individual ratings and award a Gold Standard score of 20 out of 20?')) return;
+    var result = await client.rpc('bypass_review_and_approve', { target_resource_id: resource.id });
+    if (result.error) return showToast(friendlyDatabaseError(result.error), 'error');
+    showToast('Resource approved with an expedited Gold Standard score.', 'success');
     await reloadAfterAdminChange();
   }
 
@@ -480,6 +569,8 @@
       document.getElementById('resource-length').value = resource.length || '';
       document.getElementById('resource-type').value = resource.resource_type || 'Website';
       document.getElementById('resource-status').value = resource.status || 'pending';
+      document.getElementById('resource-published-date').value = resource.published_date || '';
+      document.getElementById('resource-included-date').value = resource.included_date || '';
       document.getElementById('resource-summary').value = resource.summary || '';
       document.getElementById('resource-audience').value = (resource.audience || []).join(', ');
       document.getElementById('resource-topics').value = (resource.topics || []).join(', ');
@@ -487,6 +578,7 @@
       document.getElementById('resource-assessment-types').value = (resource.assessment_types || []).join(', ');
     } else {
       document.getElementById('resource-status').value = 'pending';
+      document.getElementById('resource-included-date').value = '';
     }
     openModal('resource-modal');
   }
@@ -501,12 +593,15 @@
       length: cleanValue('resource-length') || null,
       resource_type: cleanValue('resource-type'),
       status: cleanValue('resource-status'),
+      published_date: cleanValue('resource-published-date') || null,
+      included_date: cleanValue('resource-included-date') || null,
       summary: cleanValue('resource-summary'),
       audience: readCommaList('resource-audience', ['Public']),
       topics: readCommaList('resource-topics', []),
       grade_ranges: readCommaList('resource-grades', ['All Grades']),
       assessment_types: readCommaList('resource-assessment-types', [])
     };
+    if (payload.status === 'published' && !payload.included_date) payload.included_date = todayIso();
     var button = document.getElementById('resource-save');
     setButtonLoading(button, true, 'Saving...');
     var result = id ? await client.from('resources').update(payload).eq('id', id) : await client.from('resources').insert(payload);
@@ -614,9 +709,12 @@
 
   function renderResourceRatings(resourceId) {
     var container = document.getElementById('details-ratings');
+    var resource = adminResources.find(function (item) { return item.id === resourceId; });
     var ratings = adminRatings.filter(function (item) { return item.resource_id === resourceId; });
     if (!ratings.length) {
-      container.innerHTML = '<div class="bg-slate-50 border border-slate-200 rounded-xl p-5 text-sm text-slate-500">No ratings have been entered for this resource.</div>';
+      container.innerHTML = resource && resource.review_bypassed ?
+        '<div class="bg-amber-50 border border-amber-200 rounded-xl p-5 text-sm text-amber-900"><strong>Expedited Gold approval:</strong> Individual ratings were bypassed by an authorized reviewer, and the resource received a score of 20 out of 20.</div>' :
+        '<div class="bg-slate-50 border border-slate-200 rounded-xl p-5 text-sm text-slate-500">No ratings have been entered for this resource.</div>';
       return;
     }
     container.innerHTML = ratings.map(function (rating) {
@@ -712,10 +810,15 @@
   }
 
   function closeAllModals() {
+    var pathwayWasOpen = !document.getElementById('pathway-modal').classList.contains('hidden');
     Array.prototype.forEach.call(document.querySelectorAll('.modal'), function (modal) { modal.classList.add('hidden'); });
     document.getElementById('modal-backdrop').classList.add('hidden');
     document.getElementById('modal-backdrop').setAttribute('aria-hidden', 'true');
     document.body.style.overflow = '';
+    if (pathwayWasOpen) {
+      activePathway = null;
+      updatePathwayUI();
+    }
   }
 
   function showToast(message, type) {
@@ -729,6 +832,24 @@
   function setButtonLoading(button, loading, label) {
     button.disabled = loading;
     button.textContent = label;
+  }
+
+  function recordSiteVisit() {
+    var visitorId;
+    try {
+      visitorId = window.localStorage.getItem('cac_visitor_id');
+      if (!visitorId) {
+        visitorId = window.crypto && window.crypto.randomUUID ? window.crypto.randomUUID() :
+          'cac-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2);
+        window.localStorage.setItem('cac_visitor_id', visitorId);
+      }
+    } catch (_error) {
+      visitorId = 'session-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2);
+    }
+    client.rpc('record_site_visit', {
+      p_visitor_id: visitorId,
+      p_path: String(window.location.pathname || '/').slice(0, 300)
+    }).then(function () {}).catch(function () {});
   }
 
   function cleanValue(id) { return document.getElementById(id).value.trim(); }
@@ -759,6 +880,15 @@
     if (!value) return 'date unavailable';
     return new Intl.DateTimeFormat('en-US', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(value));
   }
+  function formatDateOnly(value, fallback) {
+    if (!value) return fallback || 'Unknown';
+    var parts = String(value).slice(0, 10).split('-');
+    if (parts.length !== 3) return fallback || String(value);
+    return new Intl.DateTimeFormat('en-US', { dateStyle: 'medium', timeZone: 'UTC' }).format(
+      new Date(Date.UTC(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2])))
+    );
+  }
+  function todayIso() { return new Date().toISOString().slice(0, 10); }
   function iconForType(type) {
     var icons = { Video: 'video', Podcast: 'mic', Website: 'globe-2', Toolkit: 'briefcase-business', Course: 'graduation-cap', 'Journal Article': 'book-open' };
     return icons[type] || 'file-text';

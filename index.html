@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=20260715-2">
+  <link rel="stylesheet" href="styles.css?v=20260716-1">
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col antialiased">
   <header class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm">
@@ -62,43 +62,40 @@
           <section class="mt-10" aria-labelledby="prelearning-heading">
             <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-3 mb-5">
               <div>
-                <h2 id="prelearning-heading" class="brand-section-heading">Pre-Learning Pathway Navigation</h2>
-                <p class="text-sm text-slate-600 mt-2">Select your role to begin with concepts and resources chosen for your context.</p>
+                <h2 id="prelearning-heading" class="brand-section-heading">Assessment Pre-Learning Pathways</h2>
+                <p class="text-sm text-slate-600 mt-2">Select your role to open a short collection of foundational resources chosen for your context.</p>
               </div>
-              <button id="clear-pathway" class="hidden text-xs font-bold text-blue-700 hover:text-blue-900 hover:underline items-center gap-1">
-                <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Clear pathway filter
-              </button>
             </div>
             <div id="prelearning-pathways" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
-              <button class="pathway-card text-left" data-pathway="teachers" data-audiences="Teacher">
+              <button class="pathway-card text-left" data-pathway="teachers" aria-haspopup="dialog" aria-controls="pathway-modal">
                 <span class="pathway-icon"><i data-lucide="book-open" class="w-5 h-5"></i></span>
                 <span class="pathway-card-title">Welcome, Teachers</span>
                 <span class="pathway-card-description">Use evidence during learning to clarify goals, respond to student thinking, and plan helpful next steps.</span>
-                <span class="pathway-link">Explore Guides <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i></span>
+                <span class="pathway-link">Open pathway resources <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i></span>
               </button>
-              <button class="pathway-card text-left" data-pathway="administrators" data-audiences="Administrator|Building Administrator|District Administrator|Instructional Coach">
+              <button class="pathway-card text-left" data-pathway="administrators" aria-haspopup="dialog" aria-controls="pathway-modal">
                 <span class="pathway-icon"><i data-lucide="building-2" class="w-5 h-5"></i></span>
                 <span class="pathway-card-title">Welcome, Administrators</span>
                 <span class="pathway-card-description">Build the conditions for assessment literacy, collaborative learning, and coherent assessment systems.</span>
-                <span class="pathway-link">Explore Strategy <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i></span>
+                <span class="pathway-link">Open pathway resources <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i></span>
               </button>
-              <button class="pathway-card text-left" data-pathway="policymakers" data-audiences="Policymaker">
+              <button class="pathway-card text-left" data-pathway="policymakers" aria-haspopup="dialog" aria-controls="pathway-modal">
                 <span class="pathway-icon"><i data-lucide="landmark" class="w-5 h-5"></i></span>
                 <span class="pathway-card-title">Welcome, Policymakers</span>
                 <span class="pathway-card-description">Consider how policy, reporting, and system design can support appropriate and equitable assessment use.</span>
-                <span class="pathway-link">Explore Policy <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i></span>
+                <span class="pathway-link">Open pathway resources <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i></span>
               </button>
-              <button class="pathway-card text-left" data-pathway="families" data-audiences="Student/Family|Public">
+              <button class="pathway-card text-left" data-pathway="families" aria-haspopup="dialog" aria-controls="pathway-modal">
                 <span class="pathway-icon"><i data-lucide="users" class="w-5 h-5"></i></span>
                 <span class="pathway-card-title">Students &amp; Families</span>
                 <span class="pathway-card-description">Make sense of learning goals, assessment information, score reports, and productive questions to ask.</span>
-                <span class="pathway-link">Explore Guides <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i></span>
+                <span class="pathway-link">Open pathway resources <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i></span>
               </button>
-              <button class="pathway-card text-left" data-pathway="higher-education" data-audiences="Teacher Educator|Researcher|Assessment Professional|Assessment Specialist|Assessment Developer|Student Teacher">
+              <button class="pathway-card text-left" data-pathway="higher-education" aria-haspopup="dialog" aria-controls="pathway-modal">
                 <span class="pathway-icon"><i data-lucide="graduation-cap" class="w-5 h-5"></i></span>
                 <span class="pathway-card-title">Professional Studies &amp; Higher Education</span>
                 <span class="pathway-card-description">Connect scholarship, professional preparation, measurement, and classroom practice across learning settings.</span>
-                <span class="pathway-link">Explore Scholarship <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i></span>
+                <span class="pathway-link">Open pathway resources <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i></span>
               </button>
             </div>
           </section>
@@ -111,9 +108,9 @@
           <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
             <div>
               <h2 id="quality-standards-heading" class="brand-section-heading compact">NCME Classroom Assessment Quality Standards</h2>
-              <p class="text-xs text-slate-500 mt-1">Resources are evaluated through the CAC 20-Point Quality Checklist. A seal is awarded after at least three peer ratings.</p>
+              <p class="text-xs text-slate-500 mt-1">Resources are evaluated through the CAC 20-Point Quality Checklist. A seal is awarded after at least three peer ratings or an authorized expedited approval.</p>
             </div>
-            <span class="text-xs text-slate-500 bg-white border border-slate-200 px-3 py-1 rounded-full font-medium">Peer Evaluated</span>
+            <span class="text-xs text-slate-500 bg-white border border-slate-200 px-3 py-1 rounded-full font-medium">Peer or Expedited Review</span>
           </div>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div class="quality-rating-card">
@@ -192,6 +189,16 @@
 
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div id="admin-summary" class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8"></div>
+        <section class="usage-panel mb-8" aria-labelledby="usage-heading">
+          <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-4">
+            <div>
+              <p class="eyebrow">Site activity</p>
+              <h3 id="usage-heading" class="brand-section-heading compact mt-1">Commons Usage</h3>
+            </div>
+            <p class="usage-privacy-note">Counts use anonymous browser identifiers. IP addresses and precise locations are not stored.</p>
+          </div>
+          <div id="admin-usage-summary" class="grid grid-cols-2 lg:grid-cols-4 gap-3" aria-live="polite"></div>
+        </section>
         <div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
           <div class="p-4 sm:p-5 border-b border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div class="flex flex-wrap gap-2" role="tablist" aria-label="Resource status">
@@ -221,6 +228,10 @@
         </div>
         <p class="text-xs sm:text-sm text-center">&copy; 2026 National Council on Measurement in Education. All rights reserved.</p>
       </div>
+      <section class="footer-feedback" aria-labelledby="footer-feedback-heading">
+          <h2 id="footer-feedback-heading">Help us strengthen the Commons</h2>
+          <p>We hope the Classroom Assessment Commons has been beneficial to your work. Feedback and suggestions for improvement are welcome at <a href="mailto:mike@maksimch.uk?subject=Classroom%20Assessment%20Commons%20feedback">mike@maksimch.uk</a>.</p>
+      </section>
       <section class="footer-disclaimer" aria-labelledby="resource-disclaimer-heading">
         <h2 id="resource-disclaimer-heading">Resource-sharing disclaimer</h2>
         <p>The Classroom Assessment Commons links to resources believed to be publicly available on the internet. Every reasonable effort has been made to provide accurate titles, attribution, descriptions, and links, but errors may occur. Inclusion is for educational resource discovery and sharing only. It does not transfer, claim, or imply NCME ownership of any copyright or other intellectual property, and it does not imply endorsement, sponsorship, or affiliation. All rights remain with the respective authors, publishers, and other rights holders. If you identify an error, or if you are a rights holder and would like your work removed from the Commons, please email <a href="mailto:Mike@Maksimch.uk?subject=Classroom%20Assessment%20Commons%20resource%20request">Mike@Maksimch.uk</a> with the resource URL and pertinent details.</p>
@@ -233,6 +244,19 @@
   </button>
 
   <div id="modal-backdrop" class="modal-backdrop hidden" aria-hidden="true"></div>
+
+  <section id="pathway-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="pathway-modal-title">
+    <div class="modal-card max-w-3xl">
+      <div class="modal-header">
+        <div><p class="eyebrow">Assessment pre-learning pathway</p><h2 id="pathway-modal-title" class="modal-title">Pathway resources</h2><p id="pathway-modal-intro" class="text-sm text-slate-500 mt-2"></p></div>
+        <button class="icon-button modal-close" aria-label="Close pathway window"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      <div class="modal-body">
+        <div id="pathway-resource-list" class="space-y-3"></div>
+        <div class="modal-actions mt-6"><button type="button" class="button-primary modal-close"><i data-lucide="x" class="w-4 h-4"></i> Close window</button></div>
+      </div>
+    </div>
+  </section>
 
   <section id="login-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="login-title">
     <div class="modal-card max-w-md">
@@ -289,6 +313,8 @@
           <div><label class="form-label" for="resource-length">Length or format detail</label><input id="resource-length" class="form-control" maxlength="100" placeholder="e.g., 20 pages or self-paced module"></div>
           <div><label class="form-label" for="resource-type">Resource type</label><select id="resource-type" class="form-control"><option>Document</option><option>Website</option><option>Video</option><option>Podcast</option><option>Toolkit</option><option>Course</option><option>Journal Article</option></select></div>
           <div><label class="form-label" for="resource-status">Publication status</label><select id="resource-status" class="form-control"><option value="pending">Pending review</option><option value="published">Published</option><option value="archived">Archived</option></select></div>
+          <div><label class="form-label" for="resource-published-date">Original publication date</label><input id="resource-published-date" type="date" class="form-control"><p class="form-help">Leave blank when the publication date is unknown.</p></div>
+          <div><label class="form-label" for="resource-included-date">Date included</label><input id="resource-included-date" type="date" class="form-control"><p class="form-help">The date this resource was accepted into the Commons.</p></div>
         </div>
         <div><label class="form-label" for="resource-summary">Description or practical use *</label><textarea id="resource-summary" rows="4" class="form-control" required maxlength="2000"></textarea></div>
         <div class="grid md:grid-cols-2 gap-4">
@@ -334,6 +360,6 @@
   <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
 
   <script src="config.js"></script>
-  <script src="app.js?v=20260714-2"></script>
+  <script src="app.js?v=20260716-1"></script>
 </body>
 </html>
