@@ -16,13 +16,15 @@
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col antialiased">
   <header class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 min-h-20 py-3 flex items-center justify-between gap-4">
-      <button id="home-button" class="flex items-center gap-4 text-left min-w-0" aria-label="Return to the public resource catalog">
-        <img src="https://ncme.org/wp-content/uploads/2025/08/cropped-NCME-Logo-F-500x153.jpg" alt="NCME" class="h-12 sm:h-14 w-auto object-contain">
-        <div class="hidden sm:block min-w-0 border-l border-slate-200 pl-4">
+      <div class="flex items-center gap-4 min-w-0">
+        <a href="https://ncme.org/" class="shrink-0 rounded focus:outline-none focus:ring-2 focus:ring-blue-700 focus:ring-offset-2" aria-label="Visit the National Council on Measurement in Education website">
+          <img src="https://ncme.org/wp-content/uploads/2025/08/cropped-NCME-Logo-F-500x153.jpg" alt="NCME" class="h-12 sm:h-14 w-auto object-contain">
+        </a>
+        <button id="home-button" class="hidden sm:block min-w-0 border-l border-slate-200 pl-4 text-left" aria-label="Return to the public resource catalog">
           <span class="block font-extrabold text-lg leading-tight text-slate-900 tracking-tight">Classroom Assessment Commons</span>
           <span class="block text-[10px] font-bold text-blue-800 uppercase tracking-widest mt-1">Curated Resource Repository</span>
-        </div>
-      </button>
+        </button>
+      </div>
       <nav class="flex items-center gap-2 sm:gap-4 text-sm font-semibold" aria-label="Primary navigation">
         <button id="explore-button" class="nav-button">Explore</button>
         <button id="submit-button" class="button-secondary">
@@ -87,13 +89,13 @@
               </button>
               <button class="pathway-card text-left" data-pathway="families" aria-haspopup="dialog" aria-controls="pathway-modal">
                 <span class="pathway-icon"><i data-lucide="users" class="w-5 h-5"></i></span>
-                <span class="pathway-card-title">Students &amp; Families</span>
+                <span class="pathway-card-title">Welcome, Students &amp; Families</span>
                 <span class="pathway-card-description">Make sense of learning goals, assessment information, score reports, and productive questions to ask.</span>
                 <span class="pathway-link">Open pathway resources <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i></span>
               </button>
               <button class="pathway-card text-left" data-pathway="higher-education" aria-haspopup="dialog" aria-controls="pathway-modal">
                 <span class="pathway-icon"><i data-lucide="graduation-cap" class="w-5 h-5"></i></span>
-                <span class="pathway-card-title">Professional Studies &amp; Higher Education</span>
+                <span class="pathway-card-title">Welcome, Professional Studies &amp; Higher Education</span>
                 <span class="pathway-card-description">Connect scholarship, professional preparation, measurement, and classroom practice across learning settings.</span>
                 <span class="pathway-link">Open pathway resources <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i></span>
               </button>
