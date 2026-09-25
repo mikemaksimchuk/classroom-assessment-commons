@@ -12,6 +12,7 @@
   var activePathway = null;
   var currentDetailsResourceId = null;
   var toastTimer = null;
+  var lastFocusedElement = null;
 
   var pathwayResources = {
     teachers: {
@@ -106,7 +107,8 @@
 
   function bindGlobalEvents() {
     document.getElementById('home-button').addEventListener('click', showPublicView);
-    document.getElementById('explore-button').addEventListener('click', showPublicView);
+    document.getElementById('explore-button').addEventListener('click', showCatalog);
+    document.getElementById('about-button').addEventListener('click', showAbout);
     document.getElementById('submit-button').addEventListener('click', function () {
       document.getElementById('submission-form').reset();
       openModal('submission-modal');
@@ -119,6 +121,10 @@
     });
     document.getElementById('logout-button').addEventListener('click', signOut);
     document.getElementById('add-resource-button').addEventListener('click', function () { openResourceEditor(null); });
+    document.getElementById('bulk-import-button').addEventListener('click', openBulkImport);
+    document.getElementById('bulk-import-form').addEventListener('submit', importBulkResources);
+    document.getElementById('export-csv-button').addEventListener('click', exportResourcesCsv);
+    document.getElementById('export-backup-button').addEventListener('click', exportBackup);
     document.getElementById('clear-filters').addEventListener('click', clearFilters);
     document.getElementById('catalog-search').addEventListener('input', renderPublicCatalog);
     document.getElementById('catalog-sort').addEventListener('change', renderPublicCatalog);
@@ -151,14 +157,18 @@
       });
     });
     document.addEventListener('keydown', function (event) {
-      if (event.key === 'Escape') closeAllModals();
+      if (event.key === 'Escape') {
+        closeAllModals();
+      } else if (event.key === 'Tab') {
+        keepFocusInModal(event);
+      }
     });
   }
 
   async function loadPublicResources() {
     setPublicLoading(true);
     var result = await client.from('resources')
-      .select('id,title,url,provider,summary,length,resource_type,audience,topics,grade_ranges,assessment_types,ratings_count,average_score,seal,review_bypassed,published_date,included_date,created_at')
+      .select('id,title,url,provider,summary,length,resource_type,audience,topics,grade_ranges,assessment_types,published_date,included_date,created_at')
       .eq('status', 'published').order('title', { ascending: true });
     if (result.error) {
       setPublicLoading(false);
@@ -205,6 +215,8 @@
     var groups = [
       { key: 'audience', label: 'Audience', values: uniqueValues(flatMap(publicResources, 'audience')) },
       { key: 'topics', label: 'Topic', values: uniqueValues(flatMap(publicResources, 'topics')) },
+      { key: 'grade_ranges', label: 'Grade range', values: uniqueValues(flatMap(publicResources, 'grade_ranges')) },
+      { key: 'assessment_types', label: 'Assessment type', values: uniqueValues(flatMap(publicResources, 'assessment_types')) },
       { key: 'resource_type', label: 'Resource type', values: uniqueValues(publicResources.map(function (item) { return item.resource_type; })) }
     ];
     controls.innerHTML = '';
@@ -266,28 +278,19 @@
 
   function createResourceCard(resource) {
     var card = document.createElement('article');
-    card.className = 'resource-card' + (resource.seal === 'Gold' ? ' seal-gold' : resource.seal === 'Silver' ? ' seal-silver' : '');
-    var seal = '';
-    if (resource.seal) {
-      var sealClass = resource.seal === 'Gold' ? 'bg-amber-50 text-amber-700 border-amber-200' : 'bg-slate-100 text-slate-700 border-slate-300';
-      seal = '<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full border text-[10px] font-bold ' + sealClass + '">' +
-        '<i data-lucide="star" class="w-3 h-3"></i>' + escapeHtml(resource.seal) + ' Standard</span>';
-    }
+    card.className = 'resource-card';
     var safeUrl = sanitizeUrl(resource.url);
     var tags = (resource.topics || []).slice(0, 3).concat((resource.audience || []).slice(0, 2));
-    var ratingText = resource.review_bypassed ? 'Expedited Gold approval' : Number(resource.ratings_count || 0) + ' verified rating' +
-      (Number(resource.ratings_count || 0) === 1 ? '' : 's');
     card.innerHTML =
       '<div class="flex items-start justify-between gap-4 mb-4">' +
         '<div class="p-2.5 bg-blue-50 text-blue-700 rounded-xl"><i data-lucide="' + iconForType(resource.resource_type) + '" class="w-5 h-5"></i></div>' +
-        '<div class="flex flex-col items-end gap-1">' + seal +
-          '<span class="text-[10px] font-bold text-slate-500 bg-slate-100 rounded px-2 py-1">' + escapeHtml(resource.resource_type || 'Resource') + '</span></div></div>' +
+        '<span class="text-[10px] font-bold text-slate-500 bg-slate-100 rounded px-2 py-1">' + escapeHtml(resource.resource_type || 'Resource') + '</span></div>' +
       '<h3 class="text-lg font-bold text-slate-900 leading-snug"><a class="hover:text-blue-700 hover:underline" href="' + escapeAttribute(safeUrl) +
         '" target="_blank" rel="noopener noreferrer">' + escapeHtml(resource.title) + '<span class="sr-only"> (opens in a new tab)</span></a></h3>' +
       '<p class="text-xs font-semibold text-slate-500 mt-2">Provider: <span class="text-slate-700">' + escapeHtml(resource.provider) + '</span></p>' +
       '<p class="text-sm text-slate-600 leading-relaxed mt-4 flex-grow">' + escapeHtml(resource.summary) + '</p>' +
-      '<div class="mt-5 pt-4 border-t border-slate-100"><div class="flex items-center justify-between gap-3 mb-2 text-xs text-slate-400">' +
-        '<span>' + escapeHtml(resource.length || 'Length not specified') + '</span><span>' + escapeHtml(ratingText) + '</span></div>' +
+      '<div class="mt-5 pt-4 border-t border-slate-100"><div class="mb-2 text-xs text-slate-400">' +
+        '<span>' + escapeHtml(resource.length || 'Length not specified') + '</span></div>' +
       '<div class="resource-dates mb-3">' + resourceDateMetadata(resource) + '</div><div class="flex flex-wrap gap-1.5">' +
         tags.map(function (tag) { return '<span class="tag">' + escapeHtml(tag) + '</span>'; }).join('') + '</div></div>';
     return card;
@@ -338,13 +341,6 @@
         return String(a.provider || '').localeCompare(String(b.provider || '')) || String(a.title || '').localeCompare(String(b.title || ''));
       }
       if (mode === 'newest') return new Date(b.included_date || b.created_at || 0) - new Date(a.included_date || a.created_at || 0);
-      var sealRank = { Gold: 2, Silver: 1 };
-      var rankDifference = (sealRank[b.seal] || 0) - (sealRank[a.seal] || 0);
-      if (rankDifference) return rankDifference;
-      var averageDifference = Number(b.average_score || 0) - Number(a.average_score || 0);
-      if (averageDifference) return averageDifference;
-      var countDifference = Number(b.ratings_count || 0) - Number(a.ratings_count || 0);
-      if (countDifference) return countDifference;
       return String(a.title || '').localeCompare(String(b.title || ''));
     });
   }
@@ -398,6 +394,20 @@
     document.getElementById('public-view').classList.remove('hidden');
     document.getElementById('admin-view').classList.add('hidden');
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function showCatalog() {
+    showPublicView();
+    window.setTimeout(function () {
+      document.getElementById('catalog-heading').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 60);
+  }
+
+  function showAbout() {
+    showPublicView();
+    window.setTimeout(function () {
+      document.getElementById('about').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 60);
   }
 
   async function showAdminView() {
@@ -489,15 +499,14 @@
         '<p class="text-xs text-amber-700 mt-2">Submitted by ' + escapeHtml(resource.submitter_name) +
         (resource.submitter_email ? ' (' + escapeHtml(resource.submitter_email) + ')' : '') + '</p>' : '';
       var ratingLabel = Number(resource.ratings_count || 0) + ' rating' + (Number(resource.ratings_count || 0) === 1 ? '' : 's');
-      if (resource.review_bypassed) ratingLabel = 'Expedited Gold approval';
+      if (resource.review_bypassed) ratingLabel = 'Expedited approval';
       var average = resource.average_score === null ? 'No average' : Number(resource.average_score).toFixed(1) + ' / 20';
       var dates = '<span class="admin-resource-dates">Published: ' + escapeHtml(formatDateOnly(resource.published_date, 'Unknown')) +
         ' · Included: ' + escapeHtml(formatDateOnly(resource.included_date, 'Not yet included')) + '</span>';
       row.innerHTML =
         '<div class="flex flex-col xl:flex-row xl:items-center justify-between gap-5"><div class="min-w-0 flex-1">' +
-        '<div class="flex flex-wrap items-center gap-2 mb-2"><span class="status-pill status-' + escapeAttribute(resource.status) + '">' + escapeHtml(resource.status) + '</span>' +
-        (resource.seal ? '<span class="status-pill ' + (resource.seal === 'Gold' ? 'bg-amber-100 text-amber-800' : 'bg-slate-200 text-slate-700') + '">' + escapeHtml(resource.seal) + '</span>' : '') +
-        '</div><h3 class="font-bold text-slate-900">' + escapeHtml(resource.title) + '</h3>' +
+        '<div class="flex flex-wrap items-center gap-2 mb-2"><span class="status-pill status-' + escapeAttribute(resource.status) + '">' + escapeHtml(resource.status) + '</span></div>' +
+        '<h3 class="font-bold text-slate-900">' + escapeHtml(resource.title) + '</h3>' +
         '<p class="text-xs text-slate-500 mt-1">' + escapeHtml(resource.provider) + ' · ' + escapeHtml(resource.resource_type) + ' · ' +
         escapeHtml(ratingLabel) + ' · ' + escapeHtml(average) + '</p><p class="text-xs text-slate-500 mt-1">' + dates + '</p>' + submitter + '</div>' +
         '<div class="flex flex-wrap gap-2 xl:justify-end"><button class="button-secondary text-xs" data-action="details" data-id="' + resource.id + '">' +
@@ -513,8 +522,12 @@
   }
 
   function statusActionButtons(resource) {
-    if (resource.status === 'pending') return '<button class="button-primary text-xs" data-action="publish" data-id="' + resource.id + '"><i data-lucide="check" class="w-4 h-4"></i> Publish</button>' +
-      '<button class="button-expedited text-xs" data-action="bypass-approve" data-id="' + resource.id + '"><i data-lucide="badge-check" class="w-4 h-4"></i> Bypass review and approve</button>';
+    if (resource.status === 'pending') {
+      var remaining = Math.max(0, 3 - Number(resource.ratings_count || 0));
+      var publishControl = remaining ? '<span class="text-xs font-semibold text-slate-500 self-center">Needs ' + remaining + ' more review' + (remaining === 1 ? '' : 's') + '</span>' :
+        '<button class="button-primary text-xs" data-action="publish" data-id="' + resource.id + '"><i data-lucide="check" class="w-4 h-4"></i> Publish</button>';
+      return publishControl + '<button class="button-expedited text-xs" data-action="bypass-approve" data-id="' + resource.id + '"><i data-lucide="badge-check" class="w-4 h-4"></i> Expedited review</button>';
+    }
     if (resource.status === 'published') return '<button class="button-muted text-xs" data-action="archive" data-id="' + resource.id + '"><i data-lucide="archive" class="w-4 h-4"></i> Archive</button>';
     return '<button class="button-primary text-xs" data-action="publish" data-id="' + resource.id + '"><i data-lucide="rotate-ccw" class="w-4 h-4"></i> Republish</button>';
   }
@@ -551,10 +564,10 @@
   }
 
   async function bypassReviewAndApprove(resource) {
-    if (!window.confirm('Approve “' + resource.title + '” without individual ratings and award a Gold Standard score of 20 out of 20?')) return;
+    if (!window.confirm('Approve “' + resource.title + '” through the documented expedited-review process without individual ratings?')) return;
     var result = await client.rpc('bypass_review_and_approve', { target_resource_id: resource.id });
     if (result.error) return showToast(friendlyDatabaseError(result.error), 'error');
-    showToast('Resource approved with an expedited Gold Standard score.', 'success');
+    showToast('Resource approved through expedited review.', 'success');
     await reloadAfterAdminChange();
   }
 
@@ -610,6 +623,225 @@
     closeAllModals();
     showToast(id ? 'Resource updated.' : 'Resource added.', 'success');
     await reloadAfterAdminChange();
+  }
+
+  function openBulkImport() {
+    var form = document.getElementById('bulk-import-form');
+    var feedback = document.getElementById('bulk-import-feedback');
+    form.reset();
+    feedback.textContent = '';
+    feedback.className = 'hidden text-sm';
+    openModal('bulk-import-modal');
+  }
+
+  async function importBulkResources(event) {
+    event.preventDefault();
+    if (!client) return;
+    var fileInput = document.getElementById('bulk-import-file');
+    var feedback = document.getElementById('bulk-import-feedback');
+    var button = document.getElementById('bulk-import-save');
+    var file = fileInput.files && fileInput.files[0];
+    if (!file) return showBulkImportFeedback('Choose a CSV or Excel file to continue.', 'error');
+    if (!window.XLSX) return showBulkImportFeedback('The spreadsheet reader did not load. Refresh the page and try again.', 'error');
+
+    setButtonLoading(button, true, 'Validating...');
+    feedback.className = 'hidden text-sm';
+    try {
+      var rawRows = await readSpreadsheetRows(file);
+      var normalized = normalizeBulkRows(rawRows);
+      if (normalized.issues.length) {
+        setButtonLoading(button, false, 'Validate and import');
+        return showBulkImportFeedback('Import not started. ' + normalized.issues.length + ' issue(s): ' + normalized.issues.slice(0, 6).join(' '), 'error');
+      }
+      if (!normalized.rows.length) {
+        setButtonLoading(button, false, 'Validate and import');
+        return showBulkImportFeedback('Import not started. The file did not contain any resource rows.', 'error');
+      }
+
+      var existingResult = await client.from('resources').select('url');
+      if (existingResult.error) throw existingResult.error;
+      var knownUrls = new Set((existingResult.data || []).map(function (resource) { return canonicalUrl(resource.url); }));
+      var rowsToImport = [];
+      var skipped = 0;
+      normalized.rows.forEach(function (row) {
+        var urlKey = canonicalUrl(row.url);
+        if (knownUrls.has(urlKey)) {
+          skipped += 1;
+          return;
+        }
+        knownUrls.add(urlKey);
+        rowsToImport.push(row);
+      });
+      if (!rowsToImport.length) {
+        setButtonLoading(button, false, 'Validate and import');
+        return showBulkImportFeedback('No resources were imported because every URL already exists in the Commons.', 'error');
+      }
+
+      setButtonLoading(button, true, 'Importing...');
+      for (var start = 0; start < rowsToImport.length; start += 100) {
+        var result = await client.from('resources').insert(rowsToImport.slice(start, start + 100));
+        if (result.error) throw result.error;
+      }
+      closeAllModals();
+      showToast(rowsToImport.length + ' resource' + (rowsToImport.length === 1 ? '' : 's') + ' imported as pending review' + (skipped ? '; ' + skipped + ' duplicate URL(s) skipped' : '') + '.', 'success');
+      await reloadAfterAdminChange();
+    } catch (error) {
+      setButtonLoading(button, false, 'Validate and import');
+      showBulkImportFeedback(friendlyDatabaseError(error), 'error');
+    }
+  }
+
+  function readSpreadsheetRows(file) {
+    return new Promise(function (resolve, reject) {
+      var reader = new FileReader();
+      reader.onerror = function () { reject(new Error('The selected file could not be read.')); };
+      reader.onload = function (event) {
+        try {
+          var workbook = window.XLSX.read(event.target.result, { type: 'array', cellDates: true });
+          var sheetName = workbook.SheetNames[0];
+          if (!sheetName) throw new Error('The spreadsheet does not contain a worksheet.');
+          var rows = window.XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], { defval: '', raw: false });
+          resolve(rows);
+        } catch (error) {
+          reject(new Error('The file could not be parsed as CSV or Excel. Confirm that it has a header row.'));
+        }
+      };
+      reader.readAsArrayBuffer(file);
+    });
+  }
+
+  function normalizeBulkRows(rawRows) {
+    var issues = [];
+    var rows = [];
+    var allowedTypes = ['Document', 'Website', 'Video', 'Podcast', 'Toolkit', 'Course', 'Journal Article'];
+    rawRows.forEach(function (sourceRow, index) {
+      var rowNumber = index + 2;
+      var row = normalizeBulkRowKeys(sourceRow);
+      var title = String(row.title || '').trim();
+      var url = sanitizeUrl(String(row.url || '').trim());
+      var provider = String(row.provider || '').trim();
+      var summary = String(row.summary || row.description || '').trim();
+      if (!title || !provider || !summary || url === '#') {
+        issues.push('Row ' + rowNumber + ' needs a valid title, URL, provider, and summary.');
+        return;
+      }
+      if (title.length > 240 || provider.length > 200 || summary.length > 2000) {
+        issues.push('Row ' + rowNumber + ' exceeds the allowed title, provider, or summary length.');
+        return;
+      }
+      var requestedType = String(row.resource_type || row.type || 'Website').trim().toLowerCase();
+      var resourceType = allowedTypes.find(function (type) { return type.toLowerCase() === requestedType; }) || 'Website';
+      var publishedDate = normalizeImportDate(row.published_date);
+      if (row.published_date && !publishedDate) {
+        issues.push('Row ' + rowNumber + ' has an invalid published_date. Use YYYY-MM-DD.');
+        return;
+      }
+      rows.push({
+        title: title,
+        url: url,
+        provider: provider,
+        summary: summary,
+        length: String(row.length || '').trim().slice(0, 100) || null,
+        resource_type: resourceType,
+        status: 'pending',
+        published_date: publishedDate,
+        included_date: null,
+        audience: importList(row.audience, ['Public']),
+        topics: importList(row.topics, []),
+        grade_ranges: importList(row.grade_ranges || row.grades, ['All Grades']),
+        assessment_types: importList(row.assessment_types || row.assessment_type, [])
+      });
+    });
+    return { rows: rows, issues: issues };
+  }
+
+  function normalizeBulkRowKeys(sourceRow) {
+    var aliases = {
+      title: 'title', 'resource title': 'title', 'resource_name': 'title',
+      url: 'url', link: 'url', 'resource url': 'url',
+      provider: 'provider', organization: 'provider', source: 'provider',
+      summary: 'summary', description: 'summary', 'practical use': 'summary',
+      resource_type: 'resource_type', 'resource type': 'resource_type', type: 'resource_type',
+      length: 'length', 'length or format detail': 'length',
+      audience: 'audience', audiences: 'audience',
+      topics: 'topics', topic: 'topics',
+      grade_ranges: 'grade_ranges', 'grade ranges': 'grade_ranges', grades: 'grade_ranges',
+      assessment_types: 'assessment_types', 'assessment types': 'assessment_types', 'assessment type': 'assessment_types',
+      published_date: 'published_date', 'published date': 'published_date', 'original publication date': 'published_date'
+    };
+    var row = {};
+    Object.keys(sourceRow || {}).forEach(function (key) {
+      var normalizedKey = String(key).trim().toLowerCase().replace(/[-_]+/g, ' ').replace(/\s+/g, ' ');
+      var canonicalKey = aliases[normalizedKey] || aliases[normalizedKey.replace(/ /g, '_')];
+      if (canonicalKey) row[canonicalKey] = sourceRow[key];
+    });
+    return row;
+  }
+
+  function importList(value, fallback) {
+    var list = String(value || '').split(/[;|]/).map(function (item) { return item.trim(); }).filter(Boolean);
+    return uniqueValues(list).length ? uniqueValues(list) : fallback;
+  }
+
+  function normalizeImportDate(value) {
+    var input = String(value || '').trim();
+    if (!input) return null;
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(input)) return null;
+    var date = new Date(input + 'T00:00:00Z');
+    return Number.isNaN(date.getTime()) ? null : input;
+  }
+
+  function canonicalUrl(value) {
+    var url = sanitizeUrl(value);
+    return url === '#' ? '' : url.replace(/\/$/, '');
+  }
+
+  function showBulkImportFeedback(message, type) {
+    var feedback = document.getElementById('bulk-import-feedback');
+    feedback.textContent = message;
+    feedback.className = 'text-sm ' + (type === 'error' ? 'text-red-700' : 'text-emerald-700');
+  }
+
+  function exportResourcesCsv() {
+    if (!adminResources.length) return showToast('There are no resources to export.', 'error');
+    var headers = ['title', 'url', 'provider', 'summary', 'length', 'resource_type', 'status', 'published_date', 'included_date', 'audience', 'topics', 'grade_ranges', 'assessment_types', 'ratings_count', 'average_score', 'review_bypassed', 'created_at', 'updated_at'];
+    var csv = [headers.join(',')].concat(adminResources.map(function (resource) {
+      return headers.map(function (header) {
+        var value = resource[header];
+        if (Array.isArray(value)) value = value.join(' | ');
+        return csvCell(value);
+      }).join(',');
+    })).join('\r\n');
+    downloadFile('classroom-assessment-commons-resources-' + todayIso() + '.csv', csv, 'text/csv;charset=utf-8');
+    showToast('Resource CSV exported.', 'success');
+  }
+
+  function exportBackup() {
+    var backup = {
+      generated_at: new Date().toISOString(),
+      resources: adminResources,
+      ratings: adminRatings,
+      resource_notes: adminNotes
+    };
+    downloadFile('classroom-assessment-commons-backup-' + todayIso() + '.json', JSON.stringify(backup, null, 2), 'application/json');
+    showToast('Review data backup exported.', 'success');
+  }
+
+  function csvCell(value) {
+    var text = value === null || value === undefined ? '' : String(value);
+    return '"' + text.replace(/"/g, '""') + '"';
+  }
+
+  function downloadFile(filename, content, type) {
+    var blob = new Blob([content], { type: type });
+    var url = URL.createObjectURL(blob);
+    var link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
   }
 
   async function handleSubmission(event) {
@@ -713,7 +945,7 @@
     var ratings = adminRatings.filter(function (item) { return item.resource_id === resourceId; });
     if (!ratings.length) {
       container.innerHTML = resource && resource.review_bypassed ?
-        '<div class="bg-amber-50 border border-amber-200 rounded-xl p-5 text-sm text-amber-900"><strong>Expedited Gold approval:</strong> Individual ratings were bypassed by an authorized reviewer, and the resource received a score of 20 out of 20.</div>' :
+        '<div class="bg-amber-50 border border-amber-200 rounded-xl p-5 text-sm text-amber-900"><strong>Expedited approval:</strong> Individual ratings were bypassed by an authorized reviewer, and the decision is recorded in the resource record.</div>' :
         '<div class="bg-slate-50 border border-slate-200 rounded-xl p-5 text-sm text-slate-500">No ratings have been entered for this resource.</div>';
       return;
     }
@@ -798,7 +1030,9 @@
   }
 
   function openModal(id) {
-    closeAllModals();
+    var previouslyFocused = document.activeElement;
+    closeAllModals(false);
+    lastFocusedElement = previouslyFocused && typeof previouslyFocused.focus === 'function' ? previouslyFocused : null;
     document.getElementById('modal-backdrop').classList.remove('hidden');
     document.getElementById('modal-backdrop').setAttribute('aria-hidden', 'false');
     var modal = document.getElementById(id);
@@ -809,7 +1043,7 @@
     refreshIcons();
   }
 
-  function closeAllModals() {
+  function closeAllModals(restoreFocus) {
     var pathwayWasOpen = !document.getElementById('pathway-modal').classList.contains('hidden');
     Array.prototype.forEach.call(document.querySelectorAll('.modal'), function (modal) { modal.classList.add('hidden'); });
     document.getElementById('modal-backdrop').classList.add('hidden');
@@ -818,6 +1052,31 @@
     if (pathwayWasOpen) {
       activePathway = null;
       updatePathwayUI();
+    }
+    if (restoreFocus !== false && lastFocusedElement && document.contains(lastFocusedElement)) {
+      var focusTarget = lastFocusedElement;
+      lastFocusedElement = null;
+      window.setTimeout(function () { focusTarget.focus(); }, 20);
+    }
+  }
+
+  function keepFocusInModal(event) {
+    var modal = Array.prototype.find.call(document.querySelectorAll('.modal'), function (item) {
+      return !item.classList.contains('hidden');
+    });
+    if (!modal) return;
+    var focusable = Array.prototype.filter.call(modal.querySelectorAll('a[href], button:not([disabled]), input:not([disabled]):not([type="hidden"]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'), function (item) {
+      return item.offsetParent !== null;
+    });
+    if (!focusable.length) return;
+    var first = focusable[0];
+    var last = focusable[focusable.length - 1];
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
     }
   }
 

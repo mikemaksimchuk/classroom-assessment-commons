@@ -11,9 +11,10 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=20260716-1">
+  <link rel="stylesheet" href="styles.css?v=20260923-committee-1">
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col antialiased">
+  <a class="skip-link" href="#main-content">Skip to resource catalog</a>
   <header class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 min-h-20 py-3 flex items-center justify-between gap-4">
       <div class="flex items-center gap-4 min-w-0">
@@ -27,6 +28,8 @@
       </div>
       <nav class="flex items-center gap-2 sm:gap-4 text-sm font-semibold" aria-label="Primary navigation">
         <button id="explore-button" class="nav-button">Explore</button>
+        <button id="about-button" class="nav-button">About</button>
+        <a class="nav-button nav-link hidden md:inline-flex" href="https://ncme.org/resources/professional-learning/">NCME Resources<span class="sr-only">, including Educator Notes</span></a>
         <button id="submit-button" class="button-secondary">
           <i data-lucide="plus-circle" class="w-4 h-4"></i>
           <span class="hidden sm:inline">Submit a Resource</span>
@@ -36,7 +39,7 @@
     </div>
   </header>
 
-  <main class="flex-grow">
+  <main id="main-content" class="flex-grow" tabindex="-1">
     <div id="configuration-warning" class="hidden bg-amber-50 border-b border-amber-200 text-amber-900 px-4 py-3 text-sm" role="alert">
       <div class="max-w-7xl mx-auto flex items-start gap-2">
         <i data-lucide="triangle-alert" class="w-5 h-5 shrink-0 mt-0.5"></i>
@@ -50,7 +53,7 @@
           <div class="max-w-4xl">
             <p class="hero-eyebrow">National Council on Measurement in Education</p>
             <h1 class="hero-title">Classroom Assessment Commons</h1>
-            <p class="hero-lede">Evidence-informed resources for thoughtful assessment practice, selected for educators, leaders, researchers, policymakers, students, and families.</p>
+            <p class="hero-lede">Evidence-informed resources for thoughtful assessment practice, organized for educators, leaders, researchers, policymakers, students, and families.</p>
           </div>
 
           <aside class="orientation-callout mt-8 max-w-5xl" aria-labelledby="orientation-heading">
@@ -106,23 +109,31 @@
       </div>
 
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        <section class="quality-standards-panel mb-8" aria-labelledby="quality-standards-heading">
-          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
-            <div>
-              <h2 id="quality-standards-heading" class="brand-section-heading compact">NCME Classroom Assessment Quality Standards</h2>
-              <p class="text-xs text-slate-500 mt-1">Resources are evaluated through the CAC 20-Point Quality Checklist. A seal is awarded after at least three peer ratings or an authorized expedited approval.</p>
-            </div>
-            <span class="text-xs text-slate-500 bg-white border border-slate-200 px-3 py-1 rounded-full font-medium">Peer or Expedited Review</span>
+        <section id="about" class="about-section mb-8 scroll-mt-28" aria-labelledby="about-heading">
+          <div class="about-introduction">
+            <p class="eyebrow">About the Commons</p>
+            <h2 id="about-heading" class="brand-section-heading mt-1">A shared resource for stronger classroom assessment</h2>
+            <p>The Classroom Assessment Commons is sponsored by the National Council on Measurement in Education Classroom Assessment Committee. It brings together publicly available resources that can support informed, equitable, and practical assessment decisions.</p>
+            <p>Resources are screened and reviewed by the Classroom Assessment Commons Resource Review Subcommittee, a designated subcommittee of the NCME Classroom Assessment Committee. The Commons shares resources for discovery and learning; it does not rank, endorse, or promote individual resources over others.</p>
           </div>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="quality-rating-card">
-              <span class="quality-star quality-star-gold"><i data-lucide="star" class="w-5 h-5"></i></span>
-              <span><strong class="block text-xs text-slate-800">Gold Standard Rating</strong><span class="block text-[11px] text-slate-500 mt-1">Exceptional resource averaging 18 to 20 rubric points.</span></span>
-            </div>
-            <div class="quality-rating-card">
-              <span class="quality-star quality-star-silver"><i data-lucide="star" class="w-5 h-5"></i></span>
-              <span><strong class="block text-xs text-slate-800">Silver Standard Rating</strong><span class="block text-[11px] text-slate-500 mt-1">Core standard resource averaging 14 to 17.99 rubric points.</span></span>
-            </div>
+          <div class="about-review-process">
+            <h3>How resources are vetted</h3>
+            <ol>
+              <li><strong>Submit or identify:</strong> A resource is proposed, cataloged with descriptive metadata, and held out of the public catalog.</li>
+              <li><strong>Review independently:</strong> At least three reviewers record their identity, review date, rubric scores, and comments.</li>
+              <li><strong>Publish responsibly:</strong> The Resource Review Subcommittee confirms that the review threshold has been met before making the resource public. An authorized expedited-review decision is documented separately when needed.</li>
+            </ol>
+          </div>
+          <div class="about-rubric" aria-labelledby="rubric-heading">
+            <h3 id="rubric-heading">20-point review rubric</h3>
+            <p>Each criterion is scored from 1 to 4. The rubric supports consistent discussion and documentation, rather than a public ranking of resources.</p>
+            <dl class="rubric-grid">
+              <div><dt>Alignment</dt><dd>Measurement principles, validity, reliability, and fairness</dd></div>
+              <div><dt>Practical utility</dt><dd>Actionable guidance and usable implementation support</dd></div>
+              <div><dt>Equity and inclusion</dt><dd>Attention to bias, accessibility, and diverse learners</dd></div>
+              <div><dt>Engagement and quality</dt><dd>Clarity, organization, presentation, and usability</dd></div>
+              <div><dt>Currency</dt><dd>Current evidence, terminology, standards, and context</dd></div>
+            </dl>
           </div>
         </section>
         <div class="flex flex-col lg:flex-row gap-8">
@@ -152,7 +163,6 @@
                 <i data-lucide="arrow-up-down" class="w-4 h-4 text-slate-400"></i>
                 <label class="text-xs font-semibold text-slate-500 whitespace-nowrap" for="catalog-sort">Sort by</label>
                 <select id="catalog-sort" class="form-control py-2 pr-8 min-w-40">
-                  <option value="quality">Quality Stars</option>
                   <option value="title">Title A–Z</option>
                   <option value="provider">Provider A–Z</option>
                   <option value="newest">Newest Added</option>
@@ -184,6 +194,9 @@
           </div>
           <div class="flex flex-wrap gap-2">
             <button id="add-resource-button" class="button-primary"><i data-lucide="plus" class="w-4 h-4"></i> Add resource</button>
+            <button id="bulk-import-button" class="button-secondary"><i data-lucide="upload" class="w-4 h-4"></i> Import CSV/XLSX</button>
+            <button id="export-csv-button" class="button-muted"><i data-lucide="download" class="w-4 h-4"></i> Export CSV</button>
+            <button id="export-backup-button" class="button-muted"><i data-lucide="archive" class="w-4 h-4"></i> Backup</button>
             <button id="logout-button" class="button-dark"><i data-lucide="log-out" class="w-4 h-4"></i> Sign out</button>
           </div>
         </div>
@@ -237,6 +250,10 @@
       <section class="footer-disclaimer" aria-labelledby="resource-disclaimer-heading">
         <h2 id="resource-disclaimer-heading">Resource-sharing disclaimer</h2>
         <p>The Classroom Assessment Commons links to resources believed to be publicly available on the internet. Every reasonable effort has been made to provide accurate titles, attribution, descriptions, and links, but errors may occur. Inclusion is for educational resource discovery and sharing only. It does not transfer, claim, or imply NCME ownership of any copyright or other intellectual property, and it does not imply endorsement, sponsorship, or affiliation. All rights remain with the respective authors, publishers, and other rights holders. If you identify an error, or if you are a rights holder and would like your work removed from the Commons, please email <a href="mailto:Mike@Maksimch.uk?subject=Classroom%20Assessment%20Commons%20resource%20request">Mike@Maksimch.uk</a> with the resource URL and pertinent details.</p>
+      </section>
+      <section class="footer-disclaimer footer-guidance" aria-labelledby="responsible-use-heading">
+        <h2 id="responsible-use-heading">Professional judgment, privacy, and AI-enabled tools</h2>
+        <p>Resources in the Commons are provided for information and professional learning. Users remain responsible for applying local professional judgment and for following applicable laws, policies, and agreements, including FERPA, COPPA, and institutional data-governance requirements. Before using an AI-enabled tool or sharing information with any external service, review its terms, accessibility, privacy, and data-handling practices. Do not enter personally identifiable student information unless your organization has expressly approved that use.</p>
       </section>
     </div>
   </footer>
@@ -330,6 +347,25 @@
     </div>
   </section>
 
+  <section id="bulk-import-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="bulk-import-title">
+    <div class="modal-card max-w-3xl">
+      <div class="modal-header">
+        <div><p class="eyebrow">Reviewer tools</p><h2 id="bulk-import-title" class="modal-title">Bulk import resources</h2></div>
+        <button class="icon-button modal-close" aria-label="Close"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      <form id="bulk-import-form" class="modal-body space-y-5">
+        <div class="import-guidance">
+          <h3>Prepare your CSV or XLSX file</h3>
+          <p>Required columns: <code>title</code>, <code>url</code>, <code>provider</code>, and <code>summary</code>. Optional columns: <code>resource_type</code>, <code>length</code>, <code>audience</code>, <code>topics</code>, <code>grade_ranges</code>, <code>assessment_types</code>, and <code>published_date</code>.</p>
+          <p>Use a semicolon or vertical bar to separate multiple values in metadata fields. Imported resources are added as <strong>pending review</strong>; a bulk import cannot publish resources or bypass the three-review threshold.</p>
+        </div>
+        <div><label class="form-label" for="bulk-import-file">CSV or Excel file *</label><input id="bulk-import-file" type="file" class="form-control" accept=".csv,.xlsx,.xls" required><p class="form-help">The first worksheet is used for Excel files.</p></div>
+        <p id="bulk-import-feedback" class="hidden text-sm" role="status" aria-live="polite"></p>
+        <div class="modal-actions"><button type="button" class="button-muted modal-close">Cancel</button><button id="bulk-import-save" type="submit" class="button-primary"><i data-lucide="upload" class="w-4 h-4"></i> Validate and import</button></div>
+      </form>
+    </div>
+  </section>
+
   <section id="rating-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="rating-modal-title">
     <div class="modal-card max-w-2xl">
       <div class="modal-header">
@@ -361,7 +397,8 @@
 
   <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
 
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script src="config.js"></script>
-  <script src="app.js?v=20260716-1"></script>
+  <script src="app.js?v=20260923-committee-1"></script>
 </body>
 </html>
