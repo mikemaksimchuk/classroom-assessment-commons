@@ -5,14 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="A curated repository of high-quality classroom assessment resources from NCME and trusted partners.">
   <title>NCME Classroom Assessment Commons</title>
+  <link rel="icon" href="https://ncme.org/wp-content/uploads/2025/10/cropped-cropped-NCME_favicon-1-180x180.png">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=20260923-committee-1">
-  <link rel="icon" href="https://ncme.org/wp-content/uploads/2025/10/cropped-cropped-NCME_favicon-1-180x180.png">
+  <link rel="stylesheet" href="styles.css?v=20260925-filters-1">
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col antialiased">
   <a class="skip-link" href="#main-content">Skip to resource catalog</a>
@@ -139,7 +139,7 @@
         </section>
         <div class="flex flex-col lg:flex-row gap-8">
           <aside class="lg:w-72 shrink-0">
-            <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm lg:sticky lg:top-28">
+            <div id="filter-panel" class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm lg:sticky lg:top-28">
               <div class="flex items-center justify-between mb-4">
                 <h3 class="font-bold text-slate-900 flex items-center gap-2"><i data-lucide="sliders-horizontal" class="w-4 h-4 text-blue-700"></i> Refine results</h3>
                 <button id="clear-filters" class="text-xs font-semibold text-blue-700 hover:underline">Clear</button>
@@ -400,6 +400,6 @@
 
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script src="config.js"></script>
-  <script src="app.js?v=20260923-committee-1"></script>
+  <script src="app.js?v=20260925-filters-1"></script>
 </body>
 </html>

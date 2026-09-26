@@ -221,17 +221,38 @@
     ];
     controls.innerHTML = '';
     groups.forEach(function (group) {
-      var section = document.createElement('fieldset');
-      section.className = 'border-t border-slate-100 pt-4';
-      var legend = document.createElement('legend');
-      legend.className = 'text-xs font-bold text-slate-700 mb-2';
-      legend.textContent = group.label;
-      section.appendChild(legend);
+      var section = document.createElement('section');
+      section.className = 'filter-group';
+      var toggle = document.createElement('button');
+      toggle.type = 'button';
+      toggle.className = 'filter-toggle';
+      toggle.setAttribute('aria-expanded', 'false');
+      var toggleText = document.createElement('span');
+      toggleText.textContent = group.label;
+      var toggleMeta = document.createElement('span');
+      toggleMeta.className = 'filter-toggle-meta';
+      toggleMeta.textContent = group.values.length + ' option' + (group.values.length === 1 ? '' : 's');
+      var toggleIcon = document.createElement('i');
+      toggleIcon.setAttribute('data-lucide', 'chevron-down');
+      toggleIcon.className = 'w-4 h-4 filter-toggle-icon';
+      toggle.appendChild(toggleText);
+      toggle.appendChild(toggleMeta);
+      toggle.appendChild(toggleIcon);
+      section.appendChild(toggle);
       var list = document.createElement('div');
-      list.className = 'space-y-2 max-h-48 overflow-y-auto pr-1';
+      list.id = 'filter-options-' + group.key;
+      list.className = 'filter-option-list hidden';
+      toggle.setAttribute('aria-controls', list.id);
+      toggle.addEventListener('click', function () {
+        var isExpanded = toggle.getAttribute('aria-expanded') === 'true';
+        toggle.setAttribute('aria-expanded', isExpanded ? 'false' : 'true');
+        list.classList.toggle('hidden', isExpanded);
+        section.classList.toggle('is-expanded', !isExpanded);
+        refreshIcons();
+      });
       group.values.forEach(function (value) {
         var label = document.createElement('label');
-        label.className = 'flex items-start gap-2 text-xs text-slate-600 cursor-pointer';
+        label.className = 'filter-option';
         var input = document.createElement('input');
         input.type = 'checkbox';
         input.className = 'mt-0.5 rounded border-slate-300 text-blue-600';
@@ -247,6 +268,7 @@
       section.appendChild(list);
       controls.appendChild(section);
     });
+    refreshIcons();
   }
 
   function renderPublicCatalog() {
