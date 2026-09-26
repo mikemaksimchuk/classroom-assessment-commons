@@ -12,7 +12,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=20260925-filters-1">
+  <link rel="stylesheet" href="styles.css?v=20260926-mike-mode-1">
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col antialiased">
   <a class="skip-link" href="#main-content">Skip to resource catalog</a>
@@ -231,6 +231,27 @@
           <div id="admin-resource-list" class="divide-y divide-slate-200"></div>
           <div id="admin-empty" class="hidden p-12 text-center text-sm text-slate-500">No resources match this view.</div>
         </div>
+        <div class="mike-mode-launch">
+          <button id="mike-mode-toggle" class="mike-mode-link" type="button" aria-expanded="false" aria-controls="mike-mode-panel"><i data-lucide="list-checks" class="w-4 h-4"></i> Mike Mode</button>
+        </div>
+        <section id="mike-mode-panel" class="mike-mode-panel hidden" aria-labelledby="mike-mode-heading">
+          <div class="mike-mode-header">
+            <div><p class="eyebrow">Expedited review queue</p><h3 id="mike-mode-heading" class="brand-section-heading compact mt-1">Mike Mode</h3><p class="mike-mode-description">Review pending resources in a compact table, then accept the checked records through the documented expedited-review process.</p></div>
+            <button id="mike-mode-close" type="button" class="icon-button" aria-label="Close Mike Mode"><i data-lucide="x" class="w-5 h-5"></i></button>
+          </div>
+          <div class="mike-mode-tools">
+            <div class="relative mike-mode-search"><i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-3"></i><label class="sr-only" for="mike-mode-search">Search pending resources</label><input id="mike-mode-search" type="search" class="form-control pl-9" placeholder="Search title, type, author, or organization"></div>
+            <div class="mike-mode-selection-controls"><label class="mike-mode-select-all"><input id="mike-mode-select-all" type="checkbox"><span>Select all visible</span></label><span id="mike-mode-selection-count" class="mike-mode-selection-count" aria-live="polite">0 selected</span></div>
+          </div>
+          <div class="mike-mode-table-wrap">
+            <table class="mike-mode-table">
+              <thead><tr><th scope="col" class="mike-mode-check-heading"><span class="sr-only">Select</span></th><th scope="col">Title</th><th scope="col">Type</th><th scope="col">Author / organization</th></tr></thead>
+              <tbody id="mike-mode-table-body"></tbody>
+            </table>
+          </div>
+          <p id="mike-mode-status" class="mike-mode-status" role="status" aria-live="polite"></p>
+          <div class="mike-mode-actions"><p>Acceptance publishes each checked resource with an expedited-review record.</p><button id="mike-mode-accept" type="button" class="button-primary" disabled><i data-lucide="badge-check" class="w-4 h-4"></i> Accept all checked resources</button></div>
+        </section>
       </div>
     </section>
   </main>
@@ -400,6 +421,6 @@
 
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script src="config.js"></script>
-  <script src="app.js?v=20260925-filters-1"></script>
+  <script src="app.js?v=20260926-mike-mode-1"></script>
 </body>
 </html>

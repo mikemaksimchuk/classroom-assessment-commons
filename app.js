@@ -13,6 +13,8 @@
   var currentDetailsResourceId = null;
   var toastTimer = null;
   var lastFocusedElement = null;
+  var mikeModeOpen = false;
+  var mikeModeSelectedIds = new Set();
 
   var pathwayResources = {
     teachers: {
@@ -137,6 +139,12 @@
     document.getElementById('note-form').addEventListener('submit', saveNote);
     document.getElementById('rating-criteria').addEventListener('change', updateRatingTotal);
     document.getElementById('admin-resource-list').addEventListener('click', handleAdminAction);
+    document.getElementById('mike-mode-toggle').addEventListener('click', toggleMikeMode);
+    document.getElementById('mike-mode-close').addEventListener('click', function () { setMikeModeOpen(false); });
+    document.getElementById('mike-mode-search').addEventListener('input', renderMikeMode);
+    document.getElementById('mike-mode-select-all').addEventListener('change', toggleMikeModeVisibleSelection);
+    document.getElementById('mike-mode-table-body').addEventListener('change', handleMikeModeSelection);
+    document.getElementById('mike-mode-accept').addEventListener('click', acceptCheckedMikeModeResources);
     document.getElementById('details-ratings').addEventListener('click', handleRatingAction);
     document.getElementById('details-notes').addEventListener('click', handleNoteAction);
     document.getElementById('details-add-rating').addEventListener('click', function () {
@@ -466,6 +474,7 @@
     renderAdminSummary();
     renderUsageSummary(usageResult.error);
     renderAdminResources();
+    renderMikeMode();
   }
 
   function renderAdminSummary() {
@@ -541,6 +550,177 @@
     });
     document.getElementById('admin-empty').classList.toggle('hidden', filtered.length !== 0);
     refreshIcons();
+  }
+
+  function toggleMikeMode() {
+    setMikeModeOpen(!mikeModeOpen);
+  }
+
+  function setMikeModeOpen(open) {
+    mikeModeOpen = open;
+    var panel = document.getElementById('mike-mode-panel');
+    var toggle = document.getElementById('mike-mode-toggle');
+    panel.classList.toggle('hidden', !open);
+    toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+    if (open) {
+      renderMikeMode();
+      window.setTimeout(function () {
+        document.getElementById('mike-mode-search').focus();
+      }, 20);
+    } else {
+      mikeModeSelectedIds.clear();
+      document.getElementById('mike-mode-search').value = '';
+      setMikeModeStatus('');
+      toggle.focus();
+    }
+    refreshIcons();
+  }
+
+  function pendingMikeModeResources() {
+    var search = document.getElementById('mike-mode-search').value.trim().toLowerCase();
+    return adminResources.filter(function (resource) {
+      if (resource.status !== 'pending') return false;
+      var haystack = [resource.title, resource.resource_type, resourceAuthorOrOrganization(resource)].join(' ').toLowerCase();
+      return !search || haystack.indexOf(search) !== -1;
+    });
+  }
+
+  function resourceAuthorOrOrganization(resource) {
+    var value = resource.author || resource.authors || resource.creator || resource.provider;
+    if (Array.isArray(value)) value = value.join(', ');
+    return String(value || 'Not specified');
+  }
+
+  function renderMikeMode() {
+    if (!mikeModeOpen) return;
+    var pendingIds = new Set(adminResources.filter(function (resource) {
+      return resource.status === 'pending';
+    }).map(function (resource) {
+      return resource.id;
+    }));
+    mikeModeSelectedIds = new Set(Array.from(mikeModeSelectedIds).filter(function (id) {
+      return pendingIds.has(id);
+    }));
+
+    var resources = pendingMikeModeResources();
+    var body = document.getElementById('mike-mode-table-body');
+    body.innerHTML = '';
+    if (!resources.length) {
+      body.innerHTML = '<tr><td colspan="4" class="mike-mode-empty">No pending resources match this view.</td></tr>';
+    } else {
+      resources.forEach(function (resource) {
+        var row = document.createElement('tr');
+        var checkCell = document.createElement('td');
+        checkCell.className = 'mike-mode-check-cell';
+        var checkbox = document.createElement('input');
+        var checkboxId = 'mike-resource-' + resource.id;
+        checkbox.type = 'checkbox';
+        checkbox.id = checkboxId;
+        checkbox.setAttribute('data-mike-resource-id', resource.id);
+        checkbox.checked = mikeModeSelectedIds.has(resource.id);
+        var label = document.createElement('label');
+        label.className = 'sr-only';
+        label.htmlFor = checkboxId;
+        label.textContent = 'Select ' + resource.title;
+        checkCell.appendChild(checkbox);
+        checkCell.appendChild(label);
+
+        var titleCell = document.createElement('td');
+        titleCell.className = 'mike-mode-title';
+        titleCell.textContent = resource.title || 'Untitled resource';
+        var typeCell = document.createElement('td');
+        typeCell.textContent = resource.resource_type || 'Not specified';
+        var authorCell = document.createElement('td');
+        authorCell.textContent = resourceAuthorOrOrganization(resource);
+        row.appendChild(checkCell);
+        row.appendChild(titleCell);
+        row.appendChild(typeCell);
+        row.appendChild(authorCell);
+        body.appendChild(row);
+      });
+    }
+    syncMikeModeSelectionControls(resources);
+  }
+
+  function syncMikeModeSelectionControls(resources) {
+    resources = resources || pendingMikeModeResources();
+    var selectedVisible = resources.filter(function (resource) {
+      return mikeModeSelectedIds.has(resource.id);
+    }).length;
+    var selectAll = document.getElementById('mike-mode-select-all');
+    selectAll.checked = resources.length > 0 && selectedVisible === resources.length;
+    selectAll.indeterminate = selectedVisible > 0 && selectedVisible < resources.length;
+    selectAll.disabled = resources.length === 0;
+    var selectedCount = mikeModeSelectedIds.size;
+    document.getElementById('mike-mode-selection-count').textContent = selectedCount + ' resource' + (selectedCount === 1 ? '' : 's') + ' selected';
+    document.getElementById('mike-mode-accept').disabled = selectedCount === 0;
+  }
+
+  function handleMikeModeSelection(event) {
+    var checkbox = event.target.closest('[data-mike-resource-id]');
+    if (!checkbox) return;
+    var id = checkbox.getAttribute('data-mike-resource-id');
+    if (checkbox.checked) mikeModeSelectedIds.add(id);
+    else mikeModeSelectedIds.delete(id);
+    syncMikeModeSelectionControls();
+  }
+
+  function toggleMikeModeVisibleSelection(event) {
+    pendingMikeModeResources().forEach(function (resource) {
+      if (event.target.checked) mikeModeSelectedIds.add(resource.id);
+      else mikeModeSelectedIds.delete(resource.id);
+    });
+    renderMikeMode();
+  }
+
+  async function acceptCheckedMikeModeResources() {
+    var resources = adminResources.filter(function (resource) {
+      return resource.status === 'pending' && mikeModeSelectedIds.has(resource.id);
+    });
+    if (!resources.length) {
+      setMikeModeStatus('No pending resources are selected.', 'error');
+      return;
+    }
+    var resourceLabel = resources.length === 1 ? 'resource' : 'resources';
+    if (!window.confirm('Accept and publish ' + resources.length + ' selected ' + resourceLabel + ' through the documented expedited-review process?')) return;
+
+    var button = document.getElementById('mike-mode-accept');
+    setButtonLoading(button, true, 'Accepting...');
+    setMikeModeStatus('Accepting 0 of ' + resources.length + ' selected ' + resourceLabel + '...');
+    var accepted = [];
+    var failures = [];
+    for (var index = 0; index < resources.length; index += 5) {
+      var batch = resources.slice(index, index + 5);
+      var results = await Promise.all(batch.map(function (resource) {
+        return client.rpc('bypass_review_and_approve', { target_resource_id: resource.id })
+          .then(function (result) { return { resource: resource, result: result }; })
+          .catch(function (error) { return { resource: resource, result: { error: error } }; });
+      }));
+      results.forEach(function (item) {
+        if (item.result && !item.result.error) accepted.push(item.resource);
+        else failures.push(item);
+      });
+      setMikeModeStatus('Accepted ' + accepted.length + ' of ' + resources.length + ' selected ' + resourceLabel + '...');
+    }
+
+    mikeModeSelectedIds = new Set(failures.map(function (item) { return item.resource.id; }));
+    setButtonLoading(button, false, 'Accept all checked resources');
+    await reloadAfterAdminChange();
+    if (failures.length) {
+      var firstError = failures[0].result && failures[0].result.error;
+      var detail = firstError ? friendlyDatabaseError(firstError) : 'Please try again.';
+      setMikeModeStatus('Accepted ' + accepted.length + ' resource' + (accepted.length === 1 ? '' : 's') + '. ' + failures.length + ' could not be accepted. ' + detail, 'error');
+      showToast(failures.length + ' selected resource' + (failures.length === 1 ? '' : 's') + ' could not be accepted.', 'error');
+      return;
+    }
+    setMikeModeStatus('Accepted and published ' + accepted.length + ' resource' + (accepted.length === 1 ? '' : 's') + '.', 'success');
+    showToast('Accepted and published ' + accepted.length + ' resource' + (accepted.length === 1 ? '' : 's') + '.', 'success');
+  }
+
+  function setMikeModeStatus(message, type) {
+    var status = document.getElementById('mike-mode-status');
+    status.textContent = message || '';
+    status.className = 'mike-mode-status' + (type ? ' is-' + type : '');
   }
 
   function statusActionButtons(resource) {

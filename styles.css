@@ -540,6 +540,34 @@ textarea:focus-visible {
 .usage-summary-card span { grid-column: 1 / -1; margin-top: .25rem; color: #64748b; font-size: .7rem; font-weight: 700; }
 .usage-unavailable { padding: 1rem; border: 1px dashed #cbd5e1; border-radius: .75rem; color: #64748b; background: #ffffff; font-size: .78rem; }
 .admin-resource-dates { font-weight: 600; }
+.mike-mode-launch { display: flex; justify-content: center; padding: 1.25rem 1rem 0; }
+.mike-mode-link { display: inline-flex; align-items: center; gap: .4rem; padding: .35rem .55rem; border: 0; border-radius: .4rem; color: #64748b; background: transparent; font-size: .78rem; font-weight: 750; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.mike-mode-link:hover, .mike-mode-link:focus-visible { color: var(--ncme-heritage-blue); background: #eef5fb; outline: none; }
+.mike-mode-panel { margin: 1.25rem 1rem 0; padding: 1.25rem; border: 1px solid #c7d7e7; border-radius: 1rem; background: linear-gradient(135deg, #ffffff, #f3f8fc); box-shadow: 0 5px 18px rgba(11, 37, 69, .06); }
+.mike-mode-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; }
+.mike-mode-header .compact { margin-bottom: 0; font-size: 1.35rem; }
+.mike-mode-description { max-width: 48rem; margin-top: .5rem; color: #475569; font-size: .85rem; line-height: 1.55; }
+.mike-mode-tools { display: flex; align-items: end; justify-content: space-between; gap: 1rem; margin-top: 1.25rem; }
+.mike-mode-search { width: min(100%, 28rem); }
+.mike-mode-selection-controls { display: flex; align-items: center; gap: .8rem; color: #475569; font-size: .78rem; white-space: nowrap; }
+.mike-mode-select-all { display: inline-flex; align-items: center; gap: .4rem; cursor: pointer; }
+.mike-mode-selection-count { color: #64748b; font-weight: 750; }
+.mike-mode-table-wrap { margin-top: 1rem; overflow-x: auto; border: 1px solid #dbe7f2; border-radius: .75rem; background: #ffffff; }
+.mike-mode-table { width: 100%; min-width: 40rem; border-collapse: collapse; color: #334155; font-size: .82rem; }
+.mike-mode-table th { padding: .7rem .85rem; border-bottom: 1px solid #c7d7e7; color: var(--ncme-deep-navy); background: #eef5fb; font-size: .72rem; font-weight: 800; letter-spacing: .03em; text-align: left; text-transform: uppercase; }
+.mike-mode-table td { padding: .72rem .85rem; border-bottom: 1px solid #e2e8f0; line-height: 1.4; vertical-align: top; }
+.mike-mode-table tbody tr:last-child td { border-bottom: 0; }
+.mike-mode-table tbody tr:hover { background: #f8fafc; }
+.mike-mode-check-heading, .mike-mode-check-cell { width: 2.75rem; text-align: center !important; }
+.mike-mode-check-cell input { width: 1rem; height: 1rem; accent-color: var(--ncme-heritage-blue); cursor: pointer; }
+.mike-mode-title { min-width: 16rem; color: var(--ncme-deep-navy); font-weight: 750; }
+.mike-mode-empty { padding: 1.25rem !important; color: #64748b; text-align: center; }
+.mike-mode-status { min-height: 1.25rem; margin-top: .75rem; color: #64748b; font-size: .78rem; }
+.mike-mode-status.is-success { color: #047857; font-weight: 700; }
+.mike-mode-status.is-error { color: #b91c1c; font-weight: 700; }
+.mike-mode-actions { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-top: .35rem; }
+.mike-mode-actions p { max-width: 38rem; color: #64748b; font-size: .75rem; line-height: 1.5; }
+.mike-mode-actions .button-primary { flex: 0 0 auto; }
 footer.bg-slate-950 { background: var(--ncme-deep-navy) !important; border-color: #264666 !important; }
 .footer-disclaimer {
   max-width: 70rem;
@@ -626,6 +654,11 @@ footer.bg-slate-950 { background: var(--ncme-deep-navy) !important; border-color
   .footer-disclaimer { text-align: center; }
   .about-section { padding: 1rem; }
   .rubric-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .mike-mode-panel { margin-left: 0; margin-right: 0; padding: 1rem; border-radius: .75rem; }
+  .mike-mode-tools, .mike-mode-actions { align-items: stretch; flex-direction: column; }
+  .mike-mode-search { width: 100%; }
+  .mike-mode-selection-controls { justify-content: space-between; }
+  .mike-mode-actions .button-primary { width: 100%; justify-content: center; }
 }
 
 @media (max-width: 900px) {
